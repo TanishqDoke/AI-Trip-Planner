@@ -22,15 +22,13 @@ import { useNavigate } from 'react-router-dom';
 function CreateTrip() {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState([]);
-
   const [openDialog, setOpenDialog] = useState(false);
-
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const navigate = useNavigate();
 
   const handleInputChange = (name, value) => {
-
     setFormData({
       ...formData,
       [name]: value
@@ -42,49 +40,103 @@ function CreateTrip() {
   }, [formData])
 
   const onGenerateTrip = async () => {
-
     const user = localStorage.getItem('user');
     if (!user) {
       setOpenDialog(true)
       return;
     }
 
-    if (formData?.noOfDAys > 5 && !formData?.location || !formData?.budget || !formData.traveler) {
-      toast('Please fill all the details')
+    if (!formData?.location || !formData?.noOfDays || !formData?.budget || !formData?.traveler) {
+      toast('Please fill all the details before generating your trip!', {
+        description: 'Make sure you\'ve selected destination, duration, budget, and travel companions.',
+      })
+      return;
+    }
+
+    if (formData?.noOfDays > 10) {
+      toast('Please select a trip duration of 10 days or less', {
+        description: 'For better results, we recommend trips of 10 days or fewer.',
+      })
       return;
     }
 
     setLoading(true)
 
-    const FINAL_PROMPT = AI_PROMPT
-      .replace('{location}', formData?.location?.label)
-      .replace('{totalDays}', formData?.noOfDays)
-      .replace('{traveler}', formData?.traveler)
-      .replace('{budget}', formData?.budget)
-      .replace('{budget}', formData?.budget)
-      .replace('{totalDays}', formData?.noOfDays)
+    try {
+      const FINAL_PROMPT = AI_PROMPT
+        .replace('{location}', formData?.location?.label)
+        .replace('{totalDays}', formData?.noOfDays)
+        .replace('{traveler}', formData?.traveler)
+        .replace('{budget}', formData?.budget)
+        .replace('{budget}', formData?.budget)
+        .replace('{totalDays}', formData?.noOfDays)
 
-    // console.log(FINAL_PROMPT)
+      console.log('Generating trip for:', formData);
+      toast('🧠 AI is crafting your perfect itinerary...', {
+        description: 'This may take a few moments. Please wait.',
+      });
 
-    const result = await chatSession.sendMessage(FINAL_PROMPT);
-    console.log(result?.response?.text());
-    setLoading(false)
-    SaveAiTrip(result?.response?.text())
+      const result = await chatSession.sendMessage(FINAL_PROMPT);
+      const tripData = result?.response?.text();
+      
+      if (!tripData) {
+        throw new Error('No response from AI service');
+      }
+
+      console.log('AI Response:', tripData);
+      SaveAiTrip(tripData);
+    } catch (error) {
+      console.error('Error generating trip:', error);
+      setLoading(false);
+      toast('Failed to generate trip', {
+        description: 'Please check your internet connection and try again. Make sure all API keys are configured.',
+      });
+    }
   }
 
   const SaveAiTrip = async (TripData) => {
-    setLoading(true)
-    const user = JSON.parse(localStorage.getItem('user'))
-    const docId = Date.now().toString();
-    // Add a new document in collection "AITrips"
-    await setDoc(doc(db, "AITrips", docId), {
-      userSelection: formData,
-      tripData: JSON.parse(TripData),
-      userEmail: user?.email,
-      id: docId
-    });
-    setLoading(false)
-    navigate('/view-trip/' + docId)
+    try {
+      const user = JSON.parse(localStorage.getItem('user'))
+      const docId = Date.now().toString();
+      
+      console.log('Saving trip to Firebase...');
+      
+      // Parse and validate the JSON response
+      let parsedTripData;
+      try {
+        parsedTripData = JSON.parse(TripData);
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', parseError);
+        throw new Error('Invalid response format from AI');
+      }
+
+      await setDoc(doc(db, "AITrips", docId), {
+        userSelection: formData,
+        tripData: parsedTripData,
+        userEmail: user?.email,
+        id: docId,
+        createdAt: new Date().toISOString()
+      });
+
+      console.log('Trip saved successfully with ID:', docId);
+      setLoading(false);
+      
+      toast('🎉 Your trip has been created!', {
+        description: 'Redirecting to your personalized itinerary...',
+      });
+      
+      // Small delay to show the success message
+      setTimeout(() => {
+        navigate('/view-trip/' + docId);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error saving trip:', error);
+      setLoading(false);
+      toast('Failed to save your trip', {
+        description: 'Please try again. If the problem persists, check your internet connection.',
+      });
+    }
   }
 
   const login = useGoogleLogin({
@@ -108,85 +160,290 @@ function CreateTrip() {
     });
   }
 
-
   return (
-    <div className='sm:px-10 md:px-32 lg:px-56 px-5 mt-10'>
-      <h2 className='font-bold text-3xl'>Tell us your travel preferences🏕️🌴</h2>
-      <p className='mt-3 text-gray-500 text-xl'>Just provide some basic information, and our trip planner will generate a customized itinerary based on your preferences.</p>
-
-      <div className='mt-20 flex flex-col gap-10'>
-        <div>
-          <h2 className='text-xl my-3 font-medium'>What is destination of choice?</h2>
-          <GooglePlacesAutocomplete
-            apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
-            selectProps={{
-              place,
-              onChange: (v) => { setPlace(v); handleInputChange('location', v) }
-            }}
-          />
+    <div className='relative min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-blue-50/30'>
+      {/* Professional grid background */}
+      <div className='absolute inset-0 bg-[linear-gradient(to_right,#dbeafe_1px,transparent_1px),linear-gradient(to_bottom,#dbeafe_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20'></div>
+      
+      {/* Subtle blue accent elements */}
+      <div className='absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-100/30 to-blue-200/40 rounded-2xl rotate-12 opacity-40'></div>
+      <div className='absolute top-60 right-20 w-20 h-20 bg-gradient-to-br from-blue-200/40 to-blue-300/50 rounded-xl -rotate-12 opacity-50'></div>
+      
+      <div className='relative max-w-5xl mx-auto px-6 py-12'>
+        {/* Professional Header Section */}
+        <div className='text-center mb-16'>
+          <div className='flex items-center justify-center gap-4 mb-8'>
+            <img src="/cerebro-professional.svg" alt="CerebroCraft" className='h-16' />
+          </div>
+          <h1 className='font-bold text-4xl md:text-5xl mb-6 text-slate-900'>
+            AI Travel Planning Console
+          </h1>
+          <p className='text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed'>
+            Configure your travel parameters to generate an optimized itinerary powered by 
+            <span className='text-slate-800 font-semibold'> advanced AI algorithms</span>
+          </p>
+          <div className='w-24 h-0.5 bg-gradient-to-r from-slate-400 to-blue-500 mx-auto mt-6'></div>
         </div>
 
-        <div>
-          <h2 className='text-xl my-3 font-medium'>How many days are you planning your trip?</h2>
-          <Input placeholder={'Ex.4'} type='number' onChange={(e) => handleInputChange('noOfDays', e.target.value)} />
-        </div>
-
-
-        <div>
-          <h2 className='text-xl my-3 font-medium'>What is Your Budget?</h2>
-          <div className='grid grid-cols-3 gap-5 mt-5'>
-            {SelectBudgetOptions.map((item, index) => (
-              <div key={index}
-                onClick={() => handleInputChange('budget', item.title)}
-                className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg ${formData?.budget == item.title && 'shadow-lg border-black'}`}>
-                <h2 className='text-4xl'>{item.icon}</h2>
-                <h2 className='font-bold text-lg'>{item.title}</h2>
-                <h2 className='text-sm text-gray-500'>{item.desc}</h2>
-              </div>
-            ))}
+        {/* Professional Progress Indicator */}
+        <div className='mb-12'>
+          <div className='bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50'>
+            <div className='flex justify-between items-center mb-4'>
+              {[1, 2, 3, 4].map((step) => (
+                <div key={step} className='flex items-center flex-1'>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                    currentStep >= step 
+                      ? 'bg-slate-900 text-white shadow-sm' 
+                      : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    {step}
+                  </div>
+                  {step < 4 && (
+                    <div className={`flex-1 h-0.5 mx-3 transition-all duration-300 ${
+                      currentStep > step ? 'bg-slate-900' : 'bg-slate-200'
+                    }`}></div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className='text-center text-sm text-slate-600'>
+              <span className='font-medium'>Configuration Step {currentStep} of 4:</span>{' '}
+              {
+                currentStep === 1 ? 'Destination Selection' :
+                currentStep === 2 ? 'Duration Parameters' :
+                currentStep === 3 ? 'Budget Configuration' :
+                'Group Composition'
+              }
+            </div>
           </div>
         </div>
 
-        <div>
-          <h2 className='text-xl my-3 font-medium'>Who do you plan on traveling with on your next adventure?</h2>
-          <div className='grid grid-cols-3 gap-5 mt-5'>
-            {SelectTravelList.map((item, index) => (
-              <div key={index}
-                onClick={() => handleInputChange('traveler', item.people)}
-                className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg ${formData?.traveler == item.people && 'shadow-lg border-black'}`}>
-                <h2 className='text-4xl'>{item.icon}</h2>
-                <h2 className='font-bold text-lg'>{item.title}</h2>
-                <h2 className='text-sm text-gray-500'>{item.desc}</h2>
+        {/* Professional Form Sections */}
+        <div className='space-y-8 create-trip-form'>
+          {/* Destination Selection */}
+          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50 relative z-40 overflow-visible'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
+                </svg>
               </div>
-            ))}
+              <div>
+                <h2 className='text-xl font-semibold text-slate-800'>Destination</h2>
+                <p className='text-sm text-slate-600'>Select your target location</p>
+              </div>
+            </div>
+            <div className='relative z-50'>
+              <GooglePlacesAutocomplete
+                apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
+                selectProps={{
+                  place,
+                  onChange: (v) => { 
+                    setPlace(v); 
+                    handleInputChange('location', v);
+                    if (v && currentStep === 1) setCurrentStep(2);
+                  },
+                  styles: {
+                    control: (provided) => ({
+                      ...provided,
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '12px',
+                      padding: '8px',
+                      fontSize: '16px',
+                      '&:hover': {
+                        borderColor: '#64748b',
+                      },
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      zIndex: 9999,
+                      position: 'absolute',
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                      marginTop: '4px',
+                    }),
+                    menuList: (provided) => ({
+                      ...provided,
+                      padding: '8px',
+                      maxHeight: '200px',
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isFocused ? '#f1f5f9' : 'white',
+                      color: '#334155',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      margin: '2px 0',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#f1f5f9',
+                      },
+                    }),
+                  },
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Days Selection */}
+          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
+                </svg>
+              </div>
+              <div>
+                <h2 className='text-xl font-semibold text-slate-800'>Duration</h2>
+                <p className='text-sm text-slate-600'>Trip length in days (1-10 recommended)</p>
+              </div>
+            </div>
+            <Input 
+              placeholder='Enter number of days' 
+              type='number' 
+              className='text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300'
+              onChange={(e) => {
+                handleInputChange('noOfDays', e.target.value);
+                if (e.target.value && currentStep === 2) setCurrentStep(3);
+              }} 
+            />
+          </div>
+
+          {/* Budget Selection */}
+          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
+                </svg>
+              </div>
+              <div>
+                <h2 className='text-xl font-semibold text-slate-800'>Budget Range</h2>
+                <p className='text-sm text-slate-600'>Select your preferred spending range</p>
+              </div>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              {SelectBudgetOptions.map((item, index) => (
+                <div key={index}
+                  onClick={() => {
+                    handleInputChange('budget', item.title);
+                    if (currentStep === 3) setCurrentStep(4);
+                  }}
+                  className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md ${
+                    formData?.budget === item.title 
+                      ? 'border-slate-400 bg-slate-50 shadow-md ring-2 ring-slate-200' 
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                  }`}
+                >
+                  <div className='flex items-start justify-between mb-3'>
+                    <div>
+                      <h3 className='text-lg font-semibold text-slate-800'>{item.title}</h3>
+                      <p className='text-sm text-slate-600 mt-1'>{item.desc}</p>
+                    </div>
+                    <div className='text-2xl opacity-60'>{item.icon}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Travel Companions */}
+          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
+                </svg>
+              </div>
+              <div>
+                <h2 className='text-xl font-semibold text-slate-800'>Travel Group</h2>
+                <p className='text-sm text-slate-600'>Select your travel companion type</p>
+              </div>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              {SelectTravelList.map((item, index) => (
+                <div key={index}
+                  onClick={() => handleInputChange('traveler', item.people)}
+                  className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md ${
+                    formData?.traveler === item.people 
+                      ? 'border-slate-400 bg-slate-50 shadow-md ring-2 ring-slate-200' 
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                  }`}
+                >
+                  <div className='flex items-start justify-between mb-3'>
+                    <div>
+                      <h3 className='text-lg font-semibold text-slate-800'>{item.title}</h3>
+                      <p className='text-sm text-slate-600 mt-1'>{item.desc}</p>
+                    </div>
+                    <div className='text-2xl opacity-60'>{item.icon}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Professional Generate Button */}
+        <div className='mt-12 text-center'>
+          <Button 
+            disabled={loading} 
+            onClick={onGenerateTrip}
+            className='bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0 min-w-[240px] disabled:opacity-60 disabled:cursor-not-allowed'
+          >
+            {loading ? (
+              <div className='flex items-center gap-3'>
+                <AiOutlineLoading3Quarters className='h-5 w-5 animate-spin' />
+                <span>Processing Request...</span>
+              </div>
+            ) : (
+              <div className='flex items-center gap-3'>
+                <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
+                </svg>
+                <span>Generate Trip Plan</span>
+              </div>
+            )}
+          </Button>
+          
+          {loading && (
+            <div className='mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto'>
+              <div className='flex items-center justify-center gap-3 mb-4'>
+                <div className='loading-spinner'></div>
+                <span className='text-gray-700 font-medium'>Crafting your perfect itinerary...</span>
+              </div>
+              <div className='w-full bg-gray-200 rounded-full h-2'>
+                <div className='bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full animate-pulse' style={{width: '60%'}}></div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Enhanced Dialog */}
+        <Dialog open={openDialog}>
+          <DialogContent className='bg-white/95 backdrop-blur-md border border-purple-200 shadow-2xl max-w-md'>
+            <DialogHeader>
+              <DialogDescription>
+                <div className='flex flex-col items-center text-center space-y-6'>
+                  <img src="/cerebro-logo.svg" alt="CerebroCraft Logo" width="180px" className='mx-auto animate-float' />
+                  <div className='space-y-3'>
+                    <h2 className='font-bold text-2xl text-gray-800'>Welcome to CerebroCraft! 🌟</h2>
+                    <p className='text-gray-600 text-lg'>Sign in to unlock your personalized travel planning experience</p>
+                  </div>
+                  <Button
+                    onClick={login}
+                    className="w-full mt-8 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 py-4 px-6 rounded-full flex gap-4 items-center justify-center font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    <FcGoogle className="h-7 w-7" />
+                    Continue with Google
+                  </Button>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      <div className='my-10 justify-end flex'>
-        <Button disabled={loading} onClick={onGenerateTrip}>
-          {loading ? <AiOutlineLoading3Quarters className='h-7 w-7 animate-spin' /> : 'Generate Trip'}
-        </Button>
-      </div>
-
-      <Dialog open={openDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogDescription>
-              <img src="/logo.svg" alt="logo" width="100px" className='items-center' />
-              <h2 className='font-bold text-lg'>Sign In to check out your travel plan</h2>
-              <p>Sign in to the App with Google authentication securely</p>
-              <Button
-                onClick={login}
-                className="w-full mt-6 flex gap-4 items-center">
-                <FcGoogle className="h-7 w-7" />Sign in With Google
-              </Button>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-
-
     </div>
   )
 }
