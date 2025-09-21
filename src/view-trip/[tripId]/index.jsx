@@ -51,6 +51,29 @@ function Viewtrip() {
                 {/* Trip Information Section */}
                 <InfoSection trip={trip} />
 
+                {/* Share Itinerary Section - Add this above the main content */}
+                {trip && (
+                    <div className='mt-8'>
+                        <div className='bg-white rounded-2xl border border-slate-200 shadow-sm p-6'>
+                            <div className='flex items-center gap-3 mb-4'>
+                                <div className='w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center'>
+                                    <svg className='w-4 h-4 text-blue-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z' />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className='text-xl font-semibold text-slate-900'>Share Your Trip</h2>
+                                    <p className='text-sm text-slate-600'>Share this amazing itinerary with friends and family</p>
+                                </div>
+                            </div>
+                            <ShareItinerary 
+                                tripId={tripId} 
+                                title={`${trip?.userSelection?.location?.label} - ${trip?.userSelection?.noOfDays} Days Trip`}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {/* Main Content Grid */}
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8'>
                     {/* Left Column - Itinerary */}
