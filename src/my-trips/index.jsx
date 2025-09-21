@@ -1,6 +1,6 @@
 import { collection } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react'
-import { useNavigation } from 'react-router-dom';
+import { useNavigation, useNavigate } from 'react-router-dom';
 import { query, where, getDocs } from "firebase/firestore";
 import { db } from '@/service/firebaseConfig';
 import UserTripCardItem from './components/UserTripCardItem';
@@ -8,6 +8,7 @@ import UserTripCardItem from './components/UserTripCardItem';
 
 function MyTrips() {
     const navigation = useNavigation();
+    const navigate = useNavigate();
     const [userTrips, setUserTrips] = useState([])
 
     useEffect(() => {
@@ -33,6 +34,19 @@ function MyTrips() {
 
         <div className='min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-blue-50/30'>
             <div className='max-w-7xl mx-auto px-6 py-12'>
+                {/* Back Button */}
+                <div className='flex items-center gap-2 mb-6'>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className='flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors'
+                    >
+                        <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+                        </svg>
+                        <span className='font-medium'>Back</span>
+                    </button>
+                </div>
+
                 {/* Professional Header */}
                 <div className='mb-12'>
                     <div className='flex items-center gap-4 mb-6'>

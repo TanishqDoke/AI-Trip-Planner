@@ -1,166 +1,121 @@
-// import React, { useEffect, useState } from 'react'
-// import { Button } from '@/components/ui/button'
-// import { FaMapLocationDot } from "react-icons/fa6";
-// import { Link } from 'react-router-dom';
-// import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi';
+﻿import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { GetDetailedPlaceInfo, PHOTO_REF_URL } from '@/service/GlobalApi'
+import { placesCache } from '@/service/PlacesCache'
 
-// function PlaceCardItem({place}) {
-//   const [photoUrl, setPhotoUrl] = useState();
+function PlaceCardItem({ place }) {
+    const [placeDetails, setPlaceDetails] = useState(null)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
 
-//   useEffect(() => {
-//       place && GetPlacePhoto();
-//   }, [place])
-
-//   const GetPlacePhoto = async () => {
-//       const data = {
-//           textQuery: place?.place
-//       }
-//       const result = await GetPlaceDetails(data).then(resp => {
-//           console.log(resp.data.places[0].photos[3].name)
-//           const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', resp.data.places[0].photos[3].name)
-//           setPhotoUrl(PhotoUrl)
-//       })
-//   }
-
-//   return (
-//     <Link to={'https://www.google.com/maps/search/?api=1&query=' + place?.place} target='_blank'>
-//         <div className='group border border-slate-200 rounded-xl p-4 hover:shadow-md hover:border-slate-300 transition-all duration-200 bg-white'>
-//             <div className='flex gap-4'>
-//                 {/* Place Image */}
-//                 <div className='flex-shrink-0'>
-//                     <img 
-//                         src={photoUrl ? photoUrl : '/placeholder.jpg'} 
-//                         alt={place?.place} 
-//                         className='w-24 h-24 rounded-lg object-cover' 
-//                     />
-//                 </div>
-                
-//                 {/* Place Details */}
-//                 <div className='flex-1 min-w-0'>
-//                     <h3 className='font-semibold text-slate-900 group-hover:text-slate-700 transition-colors line-clamp-1 mb-2'>
-//                         {place.place}
-//                     </h3>
-                    
-//                     <p className='text-sm text-slate-600 line-clamp-2 mb-3'>
-//                         {place.details}
-//                     </p>
-                    
-//                     {/* Ticket Info */}
-//                     <div className='flex items-center justify-between'>
-//                         <div className='flex items-center gap-2'>
-//                             <svg className='w-4 h-4 text-slate-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-//                                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z' />
-//                             </svg>
-//                             <span className='text-sm font-medium text-slate-700'>
-//                                 {place.ticket_pricing}
-//                             </span>
-//                         </div>
-                        
-//                         <div className='flex items-center gap-1 text-slate-400 group-hover:text-slate-600 transition-colors'>
-//                             <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-//                                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' />
-//                             </svg>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     </Link>
-//   )
-// }
-
-// export default PlaceCardItem
-
-// Corrected PlaceCardItem.jsx
-import React, { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { FaMapLocationDot } from "react-icons/fa6";
-import { Link } from 'react-router-dom';
-import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi';
-
-function PlaceCardItem({place}) {
-    const [photoUrl, setPhotoUrl] = useState();
-    
-    // Add debugging
-    console.log("PlaceCardItem received:", place);
+    const placeName = place?.name || place?.place || place?.activity
 
     useEffect(() => {
-        place && GetPlacePhoto();
-    }, [place])
+        if (placeName) {
+            fetchPlaceDetails()
+        }
+    }, [placeName])
 
-    const GetPlacePhoto = async () => {
+    const fetchPlaceDetails = async () => {
         try {
-            const data = {
-                // Fix 4: Use 'name' instead of 'place'
-                textQuery: place?.name
+            setLoading(true)
+            setError(null)
+            
+            const response = await placesCache.get(placeName, () => GetDetailedPlaceInfo(placeName))
+            
+            if (response.data && response.data.places && response.data.places.length > 0) {
+                const placeData = response.data.places[0]
+                setPlaceDetails(placeData)
+                console.log('Place details fetched:', placeData)
             }
-            const result = await GetPlaceDetails(data).then(resp => {
-                if (resp?.data?.places?.[0]?.photos?.[3]?.name) {
-                    console.log(resp.data.places[0].photos[3].name)
-                    const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', resp.data.places[0].photos[3].name)
-                    setPhotoUrl(PhotoUrl)
-                }
-            })
-        } catch (error) {
-            console.error("Error fetching place photo:", error);
+        } catch (err) {
+            console.error('Error fetching place details:', err)
+            setError('Could not fetch location details')
+        } finally {
+            setLoading(false)
         }
     }
 
+    const getPlaceImage = () => {
+        if (placeDetails?.photos && placeDetails.photos.length > 0) {
+            const photoName = placeDetails.photos[0].name
+            return PHOTO_REF_URL.replace('{NAME}', photoName)
+        }
+        return '/placeholder.jpg'
+    }
+
+    const getGoogleMapsUrl = () => {
+        if (placeDetails?.googleMapsUri) {
+            return placeDetails.googleMapsUri
+        }
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`
+    }
+
     return (
-        <Link to={'https://www.google.com/maps/search/?api=1&query=' + place?.name} target='_blank'>
-            <div className='group border border-slate-200 rounded-xl p-4 hover:shadow-md hover:border-slate-300 transition-all duration-200 bg-white'>
+        <Link to={getGoogleMapsUrl()} target='_blank'>
+            <div className='border border-slate-200 rounded-xl p-4 hover:shadow-md transition-all bg-white'>
                 <div className='flex gap-4'>
-                    {/* Place Image */}
-                    <div className='flex-shrink-0'>
+                    <div className='relative'>
                         <img 
-                            src={photoUrl ? photoUrl : '/placeholder.jpg'} 
-                            alt={place?.name} 
+                            src={getPlaceImage()}
+                            alt={placeName} 
                             className='w-24 h-24 rounded-lg object-cover' 
+                            onError={(e) => {
+                                e.target.src = '/placeholder.jpg'
+                            }}
                         />
+                        {loading && (
+                            <div className='absolute inset-0 bg-slate-100 rounded-lg flex items-center justify-center'>
+                                <div className='w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin'></div>
+                            </div>
+                        )}
                     </div>
-                    
-                    {/* Place Details */}
-                    <div className='flex-1 min-w-0'>
-                        <h3 className='font-semibold text-slate-900 group-hover:text-slate-700 transition-colors line-clamp-1 mb-2'>
-                            {place?.name}
+                    <div className='flex-1'>
+                        <h3 className='font-semibold text-slate-900 mb-2'>
+                            {placeDetails?.displayName?.text || placeName}
                         </h3>
-                        
-                        <p className='text-sm text-slate-600 line-clamp-2 mb-3'>
-                            {place?.details}
+                        <p className='text-sm text-slate-600 mb-2'>
+                            {place?.details || place?.description}
                         </p>
                         
-                        {/* Ticket Info */}
-                        <div className='flex items-center justify-between'>
-                            <div className='flex items-center gap-2'>
-                                <svg className='w-4 h-4 text-slate-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z' />
+                        {/* Location Information */}
+                        {placeDetails?.formattedAddress && (
+                            <div className='flex items-center gap-1 mb-2'>
+                                <svg className='w-3 h-3 text-slate-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
+                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
                                 </svg>
-                                <span className='text-sm font-medium text-slate-700'>
-                                    {place?.ticket_pricing || 'Free'}
+                                <span className='text-xs text-slate-500 truncate'>
+                                    {placeDetails.formattedAddress}
                                 </span>
                             </div>
-                            
-                            <div className='flex items-center gap-1 text-slate-400 group-hover:text-slate-600 transition-colors'>
-                                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' />
-                                </svg>
-                            </div>
-                        </div>
-                        
-                        {/* Additional Info */}
-                        {place?.rating && (
-                            <div className='mt-2 flex items-center gap-1'>
-                                <svg className='w-4 h-4 text-yellow-500' fill='currentColor' viewBox='0 0 24 24'>
+                        )}
+
+                        {/* Rating */}
+                        {placeDetails?.rating && (
+                            <div className='flex items-center gap-1 mb-2'>
+                                <svg className='w-3 h-3 text-yellow-500' fill='currentColor' viewBox='0 0 24 24'>
                                     <path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' />
                                 </svg>
-                                <span className='text-sm text-slate-600'>{place.rating}</span>
-                                {place?.time && (
-                                    <>
-                                        <span className='text-slate-400'>•</span>
-                                        <span className='text-sm text-slate-600'>{place.time}</span>
-                                    </>
-                                )}
+                                <span className='text-xs text-slate-600'>
+                                    {placeDetails.rating.toFixed(1)} ({placeDetails.userRatingCount || 0} reviews)
+                                </span>
                             </div>
+                        )}
+
+                        <div className='flex items-center justify-between'>
+                            <span className='text-sm font-medium text-slate-700'>
+                                {place?.ticket_pricing || place?.cost || 'Free'}
+                            </span>
+                            {place?.time && (
+                                <span className='text-xs text-slate-500'>
+                                    {place.time}
+                                </span>
+                            )}
+                        </div>
+
+                        {error && (
+                            <p className='text-xs text-red-500 mt-1'>{error}</p>
                         )}
                     </div>
                 </div>

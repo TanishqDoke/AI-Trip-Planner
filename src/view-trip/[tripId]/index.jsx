@@ -1,6 +1,6 @@
 import { db } from '@/service/firebaseConfig';
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from 'sonner';
 import InfoSection from '../components/InfoSection'; // adjust relative path as needed
@@ -8,9 +8,13 @@ import Hotels from '../components/Hotels';
 import PlacesToVisit from '../components/PlacesToVisit';
 import Footer from '../components/Footer';
 import ShareItinerary from '../../my-trips/components/ShareItinerary'; // adjust path as needed
+import HotelRecommendation from '../components/HotelRecommendation';
+import ComprehensiveItinerary from '../components/ComprehensiveItinerary';
+import BudgetBreakdown from '../components/BudgetBreakdown';
 
 function Viewtrip() {
     const { tripId } = useParams();
+    const navigate = useNavigate();
     const [trip, setTrip] = useState(null);
 
     useEffect(() => {
@@ -36,6 +40,19 @@ function Viewtrip() {
             {/* Header with Trip Overview */}
             <div className='bg-white border-b border-slate-200'>
                 <div className='max-w-7xl mx-auto px-6 py-8'>
+                    {/* Back Button */}
+                    <div className='flex items-center gap-2 mb-6'>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className='flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors'
+                        >
+                            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+                            </svg>
+                            <span className='font-medium'>Back</span>
+                        </button>
+                    </div>
+
                     <div className='flex items-center gap-4 mb-4'>
                         <img src="/cerebro-professional.svg" alt="CerebroCraft" className='h-8' />
                         <div className='h-6 w-px bg-slate-300'></div>
@@ -50,6 +67,13 @@ function Viewtrip() {
             <div className='max-w-7xl mx-auto px-6 py-8'>
                 {/* Trip Information Section */}
                 <InfoSection trip={trip} />
+
+                {/* Budget Breakdown Section */}
+                {trip && (
+                    <div className='mt-8'>
+                        <BudgetBreakdown trip={trip} />
+                    </div>
+                )}
 
                 {/* Share Itinerary Section - Add this above the main content */}
                 {trip && (
@@ -78,12 +102,20 @@ function Viewtrip() {
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8'>
                     {/* Left Column - Itinerary */}
                     <div className='lg:col-span-2'>
-                        <PlacesToVisit trip={trip} />
+                        {(trip?.tripData?.recommended_hotel || trip?.tripData?.recommended_hotels?.length > 0) ? (
+                            <ComprehensiveItinerary trip={trip} />
+                        ) : (
+                            <PlacesToVisit trip={trip} />
+                        )}
                     </div>
 
                     {/* Right Column - Hotels */}
                     <div className='lg:col-span-1'>
-                        <Hotels trip={trip} />
+                        {(trip?.tripData?.recommended_hotel || trip?.tripData?.recommended_hotels?.length > 0) ? (
+                            <HotelRecommendation trip={trip} />
+                        ) : (
+                            <Hotels trip={trip} />
+                        )}
                     </div>
                 </div>
 

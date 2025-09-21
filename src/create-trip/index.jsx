@@ -530,13 +530,13 @@ function CreateTrip() {
 
     try {
       const FINAL_PROMPT = AI_PROMPT
-        .replace('{location}', formData?.location?.label)
-        .replace('{totalDays}', formData?.noOfDays)
-        .replace('{traveler}', formData?.traveler)
-        .replace('{budget}', `${BudgetSliderConfig.currency}${formData?.budget?.min?.toLocaleString()} - ${BudgetSliderConfig.currency}${formData?.budget?.max?.toLocaleString()}`)
-        .replace('{totalDays}', formData?.noOfDays)
+        .replace(/{location}/g, formData?.location?.label)
+        .replace(/{totalDays}/g, formData?.noOfDays)
+        .replace(/{traveler}/g, formData?.traveler)
+        .replace(/{budget}/g, `${BudgetSliderConfig.currency}${formData?.budget?.min?.toLocaleString()} - ${BudgetSliderConfig.currency}${formData?.budget?.max?.toLocaleString()}`)
 
       console.log('Generating trip for:', formData);
+      console.log('Final AI Prompt:', FINAL_PROMPT);
       toast('🧠 AI is crafting your perfect itinerary...', {
         description: 'This may take a few moments. Please wait.',
       });
@@ -610,17 +610,24 @@ function CreateTrip() {
         }
         
         // Handle different hotel formats  
-        if (parsedTripData.hotels && Array.isArray(parsedTripData.hotels)) {
+        if (parsedTripData.recommended_hotels && Array.isArray(parsedTripData.recommended_hotels)) {
+          finalHotels = parsedTripData.recommended_hotels;
+        } else if (parsedTripData.hotels && Array.isArray(parsedTripData.hotels)) {
           finalHotels = parsedTripData.hotels;
         } else if (parsedTripData.hotel_options && Array.isArray(parsedTripData.hotel_options)) {
           finalHotels = parsedTripData.hotel_options;
+        } else if (parsedTripData.recommended_hotel) {
+          // Handle single hotel object
+          finalHotels = [parsedTripData.recommended_hotel];
         }
         
         // Create the final normalized structure
         parsedTripData = {
           ...parsedTripData,
           itinerary: finalItinerary,
-          hotels: finalHotels
+          hotels: finalHotels,
+          recommended_hotels: finalHotels, // Add this for backward compatibility
+          recommended_hotel: finalHotels.length > 0 ? finalHotels[0] : null // Add this for backward compatibility
         };
         
         console.log('Final normalized data:', parsedTripData);
@@ -733,6 +740,19 @@ function CreateTrip() {
       <div className='absolute top-60 right-20 w-20 h-20 bg-gradient-to-br from-blue-200/40 to-blue-300/50 rounded-xl -rotate-12 opacity-50'></div>
       
       <div className='relative max-w-5xl mx-auto px-6 py-12'>
+        {/* Back Button */}
+        <div className='flex items-center gap-2 mb-6'>
+          <button
+            onClick={() => navigate(-1)}
+            className='flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors'
+          >
+            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+            </svg>
+            <span className='font-medium'>Back</span>
+          </button>
+        </div>
+
         {/* Professional Header Section */}
         <div className='text-center mb-16'>
           <div className='flex items-center justify-center gap-4 mb-8'>
