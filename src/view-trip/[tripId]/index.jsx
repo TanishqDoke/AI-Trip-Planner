@@ -31,29 +31,43 @@ function Viewtrip() {
     }
 
     return (
-        <div className='p-10 md:px-20 lg:px-44 xl:px-56'>
-            {/* Sharing UI at the top */}
-            {trip &&
-                <ShareItinerary tripId={tripId} title={trip?.userSelection?.location?.label || trip?.title || "My Itinerary"} />
-            }
 
-            {trip ? (
-                <>
-                    {/* Information Section */}
-                    <InfoSection trip={trip} />
+        <div className='min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-blue-50/30'>
+            {/* Header with Trip Overview */}
+            <div className='bg-white border-b border-slate-200'>
+                <div className='max-w-7xl mx-auto px-6 py-8'>
+                    <div className='flex items-center gap-4 mb-4'>
+                        <img src="/cerebro-professional.svg" alt="CerebroCraft" className='h-8' />
+                        <div className='h-6 w-px bg-slate-300'></div>
+                        <div>
+                            <h1 className='text-2xl font-bold text-slate-900'>Trip Itinerary</h1>
+                            <p className='text-slate-600'>Your personalized travel plan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    {/* Recommended Hotels */}
-                    <Hotels trip={trip} />
+            <div className='max-w-7xl mx-auto px-6 py-8'>
+                {/* Trip Information Section */}
+                <InfoSection trip={trip} />
 
-                    {/* Daily Plan */}
-                    <PlacesToVisit trip={trip} />
+                {/* Main Content Grid */}
+                <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8'>
+                    {/* Left Column - Itinerary */}
+                    <div className='lg:col-span-2'>
+                        <PlacesToVisit trip={trip} />
+                    </div>
 
-                    {/* Footer */}
-                    <Footer trip={trip} />
-                </>
-            ) : (
-                <p>Loading itinerary...</p>
-            )}
+                    {/* Right Column - Hotels */}
+                    <div className='lg:col-span-1'>
+                        <Hotels trip={trip} />
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <Footer trip={trip} />
+            </div>
+
         </div>
     )
 }
