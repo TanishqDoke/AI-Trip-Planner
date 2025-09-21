@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       {/* Example translated text */}
-      <h1>{t('welcome_message')}</h1>
+      {/* <h1>{t('welcome_message')}</h1> */}
       {/* Hero component (assumed to have translatable text internally) */}
       <Hero/>
     </>
