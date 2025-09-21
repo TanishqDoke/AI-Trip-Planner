@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from 'sonner';
-import InfoSection from '../components/InfoSection';
+import InfoSection from '../components/InfoSection'; // adjust relative path as needed
 import Hotels from '../components/Hotels';
 import PlacesToVisit from '../components/PlacesToVisit';
 import Footer from '../components/Footer';
+import ShareItinerary from '../../my-trips/components/ShareItinerary'; // adjust path as needed
 
 function Viewtrip() {
     const { tripId } = useParams();
-    const [trip, setTrip] = useState([])
+    const [trip, setTrip] = useState(null);
 
     useEffect(() => {
         tripId && GetTripData()
@@ -22,18 +23,15 @@ function Viewtrip() {
         const docSnap = await getDoc(docRef)
 
         if (docSnap.exists()) {
-            console.log("Document: ", docSnap.data())
             setTrip(docSnap.data());
         }
-
         else {
-            console.log("No such document")
             toast("No trip found")
         }
-
     }
 
     return (
+
         <div className='min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-blue-50/30'>
             {/* Header with Trip Overview */}
             <div className='bg-white border-b border-slate-200'>
@@ -69,6 +67,7 @@ function Viewtrip() {
                 {/* Footer */}
                 <Footer trip={trip} />
             </div>
+
         </div>
     )
 }

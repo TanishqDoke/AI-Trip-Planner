@@ -1,6 +1,7 @@
 import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
+import ShareItinerary from './ShareItinerary'; // Adjust path to your ShareItinerary component location
 
 function UserTripCardItem({ trip }) {
   const [photoUrl, setPhotoUrl] = useState();
@@ -88,6 +89,7 @@ function UserTripCardItem({ trip }) {
   }
 
   return (
+
     <Link to={`/view-trip/${trip?.id}`}>
       <div className='bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-slate-300 overflow-hidden group'>
         {/* Image Section */}
