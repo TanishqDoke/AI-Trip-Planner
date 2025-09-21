@@ -20,6 +20,32 @@ function InfoSection({ trip }) {
             setPhotoUrl(PhotoUrl)
         })
     }
+
+    // Show loading state if trip data is not available
+    if (!trip || !trip.userSelection) {
+        return (
+            <div className='bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden'>
+                <div className='relative h-64 md:h-80 bg-slate-200 animate-pulse'></div>
+                <div className='p-8'>
+                    <div className='mb-6'>
+                        <div className='h-8 bg-slate-200 rounded animate-pulse mb-3'></div>
+                        <div className='h-4 bg-slate-200 rounded animate-pulse w-1/2'></div>
+                    </div>
+                    <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className='flex items-center gap-3 p-4 bg-slate-50 rounded-xl'>
+                                <div className='w-10 h-10 bg-slate-200 rounded-lg animate-pulse'></div>
+                                <div className='flex-1'>
+                                    <div className='h-4 bg-slate-200 rounded animate-pulse mb-2'></div>
+                                    <div className='h-5 bg-slate-200 rounded animate-pulse'></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
     
     return (
         <div className='bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden'>
@@ -54,7 +80,7 @@ function InfoSection({ trip }) {
                         <div>
                             <p className='text-sm text-slate-600'>Duration</p>
                             <p className='font-semibold text-slate-900'>
-                                {trip.userSelection?.noOfDays} {trip.userSelection?.noOfDays === '1' ? 'Day' : 'Days'}
+                                {trip?.userSelection?.noOfDays || 'N/A'} {trip?.userSelection?.noOfDays === '1' ? 'Day' : 'Days'}
                             </p>
                         </div>
                     </div>
@@ -68,7 +94,7 @@ function InfoSection({ trip }) {
                         </div>
                         <div>
                             <p className='text-sm text-slate-600'>Budget</p>
-                            <p className='font-semibold text-slate-900 capitalize'>{trip.userSelection?.budget}</p>
+                            <p className='font-semibold text-slate-900 capitalize'>{trip?.userSelection?.budget || 'N/A'}</p>
                         </div>
                     </div>
 
@@ -81,7 +107,7 @@ function InfoSection({ trip }) {
                         </div>
                         <div>
                             <p className='text-sm text-slate-600'>Group Size</p>
-                            <p className='font-semibold text-slate-900'>{trip.userSelection?.traveler}</p>
+                            <p className='font-semibold text-slate-900'>{trip?.userSelection?.traveler || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
