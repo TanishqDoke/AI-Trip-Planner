@@ -9,4 +9,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: process.env.BASE_VITE_PATH || "/AI-Trip-Planner/"
 })
