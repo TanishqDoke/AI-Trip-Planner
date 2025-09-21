@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/dialog"
 import { FcGoogle } from "react-icons/fc";
 import axios from 'axios';
+import i18n from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 function Header() {
+  const { t } = useTranslation();  // Added translation hook
   const user = JSON.parse(localStorage.getItem('user'));
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -44,53 +47,67 @@ function Header() {
     });
   }
 
+  const handleLanguageChange = (e) => {
+    i18n.changeLanguage(e.target.value);
+  }
+
   return (
     <div className='shadow-sm flex justify-between items-center px-6'>
-      <img src="/logo.svg" alt="Logo" />
-      <div>
+      <img src="/logo.svg" alt={t('logo_alt')} />
+      <div className="flex items-center gap-4">
+        <select
+          onChange={handleLanguageChange}
+          defaultValue={i18n.language}
+          className="border rounded px-2 py-1"
+          aria-label={t('select_language')}
+        >
+          <option value="en">English</option>
+          <option value="hi">हिंदी</option>
+          <option value="mr">मराठी</option>
+        </select>
+
         {user ?
           <div className='flex items-center gap-3'>
             <a href="/create-trip">
-            <Button variant="outline" className="rounded-full">+ Create Trip</Button>
+              <Button variant="outline" className="rounded-full">{t('create_trip')}</Button>
             </a>
             <a href="/my-trips">
-            <Button variant="outline" className="rounded-full">My Trips</Button>
+              <Button variant="outline" className="rounded-full">{t('my_trips')}</Button>
             </a>
             <Popover>
-              <PopoverTrigger>             
-                <img src={user?.picture} alt="" className='h-[35px] w-[35px] rounded-full' />
+              <PopoverTrigger>
+                <img src={user?.picture} alt={t('user_profile_picture')} className='h-[35px] w-[35px] rounded-full' />
               </PopoverTrigger>
               <PopoverContent>
                 <h2 className='cursor-pointer' onClick={()=>{
                   googleLogout();
                   localStorage.clear();
                   window.location.reload();
-                }}>Logout</h2>
+                }}>{t('logout')}</h2>
               </PopoverContent>
             </Popover>
-
-          </div> : <Button onClick={()=>setOpenDialog(true)}>Sign In</Button>}
+          </div> : <Button onClick={()=>setOpenDialog(true)}>{t('sign_in')}</Button>}
       </div>
 
       <Dialog open={openDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogDescription>
-              <img src="/logo.svg" alt="logo" width="100px" className='items-center' />
-              <h2 className='font-bold text-lg'>Sign In to check out your travel plan</h2>
-              <p>Sign in to the App with Google authentication securely</p>
+              <img src="/logo.svg" alt={t('logo_alt')} width="100px" className='items-center' />
+              <h2 className='font-bold text-lg'>{t('sign_in_heading')}</h2>
+              <p>{t('sign_in_subheading')}</p>
               <Button
                 onClick={login}
-                className="w-full mt-6 flex gap-4 items-center">
-                <FcGoogle className="h-7 w-7" />Sign in With Google
+                className="w-full mt-6 flex gap-4 items-center"
+              >
+                <FcGoogle className="h-7 w-7" />{t('sign_in_with_google')}
               </Button>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }
 
-export default Header
+export default Header;
