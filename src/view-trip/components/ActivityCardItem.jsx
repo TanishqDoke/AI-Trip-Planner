@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { GetDetailedPlaceInfo, PHOTO_REF_URL } from '@/service/GlobalApi'
+import { GetDetailedPlaceInfo } from '@/service/GlobalApi'
 import { placesCache } from '@/service/PlacesCache'
 
 function ActivityCardItem({ activity, activityIndex, tripDestination }) {
@@ -67,13 +67,9 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                     
                     if (isRelevant) {
                         setPlaceDetails(placeData)
-                        console.log('Validated place details for:', activityName, placeData)
-                    } else {
-                        console.log('Filtered out irrelevant location for:', activityName, 'Expected:', destination, 'Got:', address)
                     }
                 } else {
                     setPlaceDetails(placeData)
-                    console.log('Place details (no validation):', activityName, placeData)
                 }
             }
         } catch (err) {
@@ -98,7 +94,7 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
             <div className='flex gap-4'>
                 <div className='flex-shrink-0'>
                     <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
-                        <span className='text-blue-600 text-lg'>📍</span>
+                         <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.24a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                     </div>
                 </div>
                 <div className='flex-1'>
@@ -117,7 +113,6 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                         {activity.details || activity.description}
                     </p>
 
-                    {/* Enhanced Location Information */}
                     {placeDetails?.formattedAddress && (
                         <div className='flex items-center gap-1 mb-2'>
                             <svg className='w-3 h-3 text-slate-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -130,19 +125,6 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                         </div>
                     )}
 
-                    {/* Coordinates */}
-                    {placeDetails?.location && (
-                        <div className='flex items-center gap-1 mb-2'>
-                            <svg className='w-3 h-3 text-slate-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3' />
-                            </svg>
-                            <span className='text-xs text-slate-400'>
-                                {placeDetails.location.latitude.toFixed(4)}, {placeDetails.location.longitude.toFixed(4)}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Rating */}
                     {placeDetails?.rating && (
                         <div className='flex items-center gap-1 mb-2'>
                             <svg className='w-3 h-3 text-yellow-500' fill='currentColor' viewBox='0 0 24 24'>
@@ -154,15 +136,10 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                         </div>
                     )}
 
-                    {/* Original location if exists */}
-                    {activity.location && !placeDetails?.formattedAddress && (
-                        <p className='text-xs text-slate-500 mb-2'>📍 {activity.location}</p>
-                    )}
-
-                    <div className='flex items-center justify-between'>
+                    <div className='flex items-center justify-between mt-2'>
                         {(activity.cost || activity.ticket_pricing) && (
                             <span className='inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded'>
-                                💰 {activity.cost || activity.ticket_pricing}
+                                Cost: {activity.cost || activity.ticket_pricing}
                             </span>
                         )}
                         

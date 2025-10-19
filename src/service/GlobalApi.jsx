@@ -1,24 +1,27 @@
-import axios from "axios"
+import axios from "axios";
 
-const BASE_URL = 'https://places.googleapis.com/v1/places:autocomplete';
+const API_KEY = import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
+const TEXT_SEARCH_BASE_URL = 'https://places.googleapis.com/v1/places:searchText';
 
-const config={
-    headers:{
+const baseConfig = {
+    headers: {
         'Content-Type': 'application/json',
-        'X-Goog-Api-Key': import.meta.env.VITE_GOOGLE_PLACE_API_KEY,
-        'X-Goog-FieldMask': [
-            'places.photos',
-            'places.displayName',
-            'places.id'
-        ]
+        'X-Goog-Api-Key': API_KEY,
     }
-}
+};
 
-// Enhanced config for detailed place information including location
-const detailedConfig={
-    headers:{
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': import.meta.env.VITE_GOOGLE_PLACE_API_KEY,
+const simpleConfig = {
+    ...baseConfig,
+    headers: {
+        ...baseConfig.headers,
+        'X-Goog-FieldMask': ['places.displayName', 'places.id']
+    }
+};
+
+const detailedConfig = {
+    ...baseConfig,
+    headers: {
+        ...baseConfig.headers,
         'X-Goog-FieldMask': [
             'places.photos',
             'places.displayName',
@@ -31,17 +34,26 @@ const detailedConfig={
             'places.googleMapsUri'
         ]
     }
-}
+};
 
-export const GetPlaceDetails=(data)=>axios.post(BASE_URL,data,config)
+// Legacy function restored for components that require it.
+export const GetPlaceDetails = (data) => axios.post(TEXT_SEARCH_BASE_URL, data, simpleConfig);
 
-// New function to get detailed place information with location
-export const GetDetailedPlaceInfo = (placeName) => {
+// Main function for fetching rich place details.
+export const GetDetailedPlaceInfo = (textQuery) => {
     const data = {
-        textQuery: placeName,
+        textQuery: textQuery,
         maxResultCount: 1
-    }
-    return axios.post(BASE_URL, data, detailedConfig)
-}
+    };
+    return axios.post(TEXT_SEARCH_BASE_URL, data, detailedConfig);
+};
 
-export const PHOTO_REF_URL = 'https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=1000&maxWidthPx=1900&key=' + import.meta.env.VITE_GOOGLE_PLACE_API_KEY
+// Legacy constant, kept for any components that might still use it.
+export const PHOTO_REF_URL = `https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=1000&maxWidthPx=1900&key=${API_KEY}`;
+
+// Preferred function for constructing a photo URL.
+export const buildPhotoUrl = (photoName) => {
+    if (!photoName) return null;
+    return `https://places.googleapis.com/v1/${photoName}/media?maxHeightPx=1000&maxWidthPx=1900&key=${API_KEY}`;
+};
+

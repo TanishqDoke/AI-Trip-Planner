@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { GetDetailedPlaceInfo, PHOTO_REF_URL } from '@/service/GlobalApi'
+import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi'
 import { placesCache } from '@/service/PlacesCache'
 
 function PlaceCardItem({ place }) {
@@ -26,7 +26,6 @@ function PlaceCardItem({ place }) {
             if (response.data && response.data.places && response.data.places.length > 0) {
                 const placeData = response.data.places[0]
                 setPlaceDetails(placeData)
-                console.log('Place details fetched:', placeData)
             }
         } catch (err) {
             console.error('Error fetching place details:', err)
@@ -39,7 +38,8 @@ function PlaceCardItem({ place }) {
     const getPlaceImage = () => {
         if (placeDetails?.photos && placeDetails.photos.length > 0) {
             const photoName = placeDetails.photos[0].name
-            return PHOTO_REF_URL.replace('{NAME}', photoName)
+            // Use the new helper function, requesting a smaller image size for the card
+            return buildPhotoUrl(photoName, 200, 200) 
         }
         return '/placeholder.jpg'
     }
@@ -125,3 +125,4 @@ function PlaceCardItem({ place }) {
 }
 
 export default PlaceCardItem
+

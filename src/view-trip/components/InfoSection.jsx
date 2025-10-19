@@ -1,24 +1,39 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi'
+import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi'
+import { placesCache } from '@/service/PlacesCache'
 
 function InfoSection({ trip }) {
 
-    const [photoUrl, setPhotoUrl] = useState();
+    const [photoUrl, setPhotoUrl] = useState('/placeholder.jpg');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         trip && GetPlacePhoto();
     }, [trip])
 
     const GetPlacePhoto = async () => {
-        const data = {
-            textQuery: trip?.userSelection?.location?.label
+        if (!trip?.userSelection?.location?.label) {
+            setIsLoading(false);
+            return;
         }
-        const result = await GetPlaceDetails(data).then(resp => {
-            console.log(resp.data.places[0].photos[3].name)
-            const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', resp.data.places[0].photos[3].name)
-            setPhotoUrl(PhotoUrl)
-        })
+
+        setIsLoading(true);
+        const destinationName = trip.userSelection.location.label;
+
+        try {
+            const response = await placesCache.get(destinationName, () => GetDetailedPlaceInfo(destinationName));
+            const photoName = response.data?.places?.[0]?.photos?.[0]?.name;
+
+            if (photoName) {
+                const fullUrl = buildPhotoUrl(photoName);
+                setPhotoUrl(fullUrl);
+            }
+        } catch (error) {
+            console.error('InfoSection - Failed to fetch photo:', error);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     // Show loading state if trip data is not available
@@ -46,16 +61,23 @@ function InfoSection({ trip }) {
             </div>
         )
     }
-    
+
     return (
         <div className='bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden'>
             {/* Hero Image */}
             <div className='relative h-64 md:h-80'>
-                <img 
-                    src={photoUrl ? photoUrl : '/placeholder.jpg'} 
-                    alt="Destination" 
-                    className='w-full h-full object-cover' 
-                />
+                {isLoading ? (
+                    <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                        <div className='w-8 h-8 border-4 border-slate-400 border-t-transparent rounded-full animate-spin'></div>
+                    </div>
+                ) : (
+                    <img
+                        src={photoUrl}
+                        alt={`${trip?.userSelection?.location?.label || 'Destination'}`}
+                        className='w-full h-full object-cover'
+                        onError={(e) => { e.target.src = '/placeholder.jpg'; }}
+                    />
+                )}
                 <div className='absolute inset-0 bg-gradient-to-t from-black/20 to-transparent'></div>
             </div>
 
@@ -80,9 +102,9 @@ function InfoSection({ trip }) {
                         <div>
                             <p className='text-sm text-slate-600'>Recommended Hotel</p>
                             <p className='font-semibold text-slate-900'>
-                                {trip?.tripData?.recommended_hotel?.name || 
-                                 trip?.tripData?.recommended_hotels?.[0]?.name || 
-                                 trip?.tripData?.hotels?.[0]?.name || 'N/A'}
+                                {trip?.tripData?.recommended_hotel?.name ||
+                                    trip?.tripData?.recommended_hotels?.[0]?.name ||
+                                    trip?.tripData?.hotels?.[0]?.name || 'N/A'}
                             </p>
                         </div>
                     </div>

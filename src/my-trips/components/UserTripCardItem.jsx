@@ -1,10 +1,10 @@
-import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi';
+import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi';
+import { placesCache } from '@/service/PlacesCache';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
-import ShareItinerary from './ShareItinerary'; // Adjust path to your ShareItinerary component location
 
 function UserTripCardItem({ trip }) {
-  const [photoUrl, setPhotoUrl] = useState();
+  const [photoUrl, setPhotoUrl] = useState('/placeholder.jpg');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -12,48 +12,26 @@ function UserTripCardItem({ trip }) {
   }, [trip])
 
   const GetPlacePhoto = async () => {
+    if (!trip?.userSelection?.location?.label) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const destinationName = trip.userSelection.location.label;
+
     try {
-      const data = {
-        textQuery: trip?.userSelection?.location?.label
-      }
+      const response = await placesCache.get(destinationName, () => GetDetailedPlaceInfo(destinationName));
+      const photoName = response.data?.places?.[0]?.photos?.[0]?.name;
       
-      const result = await GetPlaceDetails(data);
-      const places = result?.data?.places;
-      
-      if (places && places.length > 0 && places[0].photos && places[0].photos.length > 0) {
-        // Try to get the best available photo (prefer index 0, 1, or 2 over 3)
-        const photoIndex = Math.min(places[0].photos.length - 1, Math.floor(Math.random() * Math.min(4, places[0].photos.length)));
-        const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', places[0].photos[photoIndex].name);
-        setPhotoUrl(PhotoUrl);
-      } else {
-        // Fallback to a beautiful default image based on location
-        setPhotoUrl(getDefaultImageForLocation(trip?.userSelection?.location?.label));
+      if (photoName) {
+        const fullUrl = buildPhotoUrl(photoName);
+        setPhotoUrl(fullUrl);
       }
     } catch (error) {
-      console.log('Error fetching place photo:', error);
-      setPhotoUrl(getDefaultImageForLocation(trip?.userSelection?.location?.label));
+      console.error('UserTripCard - Failed to fetch photo:', error);
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  const getDefaultImageForLocation = (location) => {
-    // Create beautiful default images based on location keywords
-    const locationLower = location?.toLowerCase() || '';
-    
-    if (locationLower.includes('beach') || locationLower.includes('island') || locationLower.includes('hawaii') || locationLower.includes('bali')) {
-      return 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop';
-    } else if (locationLower.includes('mountain') || locationLower.includes('himalaya') || locationLower.includes('alps') || locationLower.includes('denver')) {
-      return 'https://images.unsplash.com/photo-1464822759844-d150ad6c0a12?w=800&h=600&fit=crop';
-    } else if (locationLower.includes('city') || locationLower.includes('new york') || locationLower.includes('tokyo') || locationLower.includes('london')) {
-      return 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop';
-    } else if (locationLower.includes('desert') || locationLower.includes('dubai') || locationLower.includes('sahara')) {
-      return 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&h=600&fit=crop';
-    } else if (locationLower.includes('forest') || locationLower.includes('jungle') || locationLower.includes('amazon')) {
-      return 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop';
-    } else {
-      // Generic travel image
-      return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=600&fit=crop';
     }
   }
 
@@ -95,16 +73,16 @@ function UserTripCardItem({ trip }) {
         {/* Image Section */}
         <div className='relative h-48 overflow-hidden'>
           {isLoading ? (
-            <div className='w-full h-full bg-slate-200 animate-pulse'></div>
+            <div className='w-full h-full bg-slate-200 flex items-center justify-center'>
+              <div className='w-8 h-8 border-4 border-slate-400 border-t-transparent rounded-full animate-spin'></div>
+            </div>
           ) : (
             <>
               <img 
-                src={photoUrl} 
-                alt={trip?.userSelection?.location?.label || 'Trip destination'} 
+                src={photoUrl}
+                alt={`${trip?.userSelection?.location?.label || 'Destination'}`}
                 className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'
-                onError={(e) => {
-                  e.target.src = getDefaultImageForLocation(trip?.userSelection?.location?.label);
-                }}
+                onError={(e) => { e.target.src = '/placeholder.jpg'; }}
               />
               <div className='absolute inset-0 bg-gradient-to-t from-black/10 to-transparent'></div>
             </>

@@ -1,10 +1,45 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi'
+import { placesCache } from '@/service/PlacesCache'
 
 function HotelRecommendation({ trip }) {
+    const [hotelPhotoUrl, setHotelPhotoUrl] = useState('/placeholder.jpg');
+    const [isLoadingPhoto, setIsLoadingPhoto] = useState(true);
+
     // Try to get hotel from multiple possible locations
     const hotel = trip?.tripData?.recommended_hotel || 
                   trip?.tripData?.recommended_hotels?.[0] || 
                   trip?.tripData?.hotels?.[0];
+
+    useEffect(() => {
+        if (hotel?.name) {
+            fetchHotelPhoto();
+        } else {
+            setIsLoadingPhoto(false);
+        }
+    }, [hotel]);
+
+    const fetchHotelPhoto = async () => {
+        if (!hotel?.name) {
+            setIsLoadingPhoto(false);
+            return;
+        }
+
+        setIsLoadingPhoto(true);
+        try {
+            const response = await placesCache.get(hotel.name, () => GetDetailedPlaceInfo(hotel.name));
+            const photoName = response.data?.places?.[0]?.photos?.[0]?.name;
+            
+            if (photoName) {
+                const fullUrl = buildPhotoUrl(photoName);
+                setHotelPhotoUrl(fullUrl);
+            }
+        } catch (error) {
+            console.error('Failed to fetch hotel photo:', error);
+        } finally {
+            setIsLoadingPhoto(false);
+        }
+    };
 
     if (!hotel) {
         return (
@@ -20,11 +55,18 @@ function HotelRecommendation({ trip }) {
         <div className='bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden'>
             {/* Hotel Image */}
             <div className='relative h-48'>
-                <img 
-                    src={hotel.image_url || '/placeholder.jpg'} 
-                    alt={hotel.name}
-                    className='w-full h-full object-cover' 
-                />
+                {isLoadingPhoto ? (
+                    <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                        <div className='w-8 h-8 border-4 border-slate-400 border-t-transparent rounded-full animate-spin'></div>
+                    </div>
+                ) : (
+                    <img 
+                        src={hotelPhotoUrl} 
+                        alt={hotel.name}
+                        className='w-full h-full object-cover'
+                        onError={(e) => { e.target.src = '/placeholder.jpg'; }}
+                    />
+                )}
                 <div className='absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-semibold text-green-600'>
                     {hotel.rating}
                 </div>

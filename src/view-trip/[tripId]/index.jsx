@@ -11,6 +11,7 @@ import ShareItinerary from '../../my-trips/components/ShareItinerary'; // adjust
 import HotelRecommendation from '../components/HotelRecommendation';
 import ComprehensiveItinerary from '../components/ComprehensiveItinerary';
 import BudgetBreakdown from '../components/BudgetBreakdown';
+import { HeroWithImage } from '@/components/custom/Hero';
 
 function Viewtrip() {
     const { tripId } = useParams();
@@ -90,8 +91,8 @@ function Viewtrip() {
                                     <p className='text-sm text-slate-600'>Share this amazing itinerary with friends and family</p>
                                 </div>
                             </div>
-                            <ShareItinerary 
-                                tripId={tripId} 
+                            <ShareItinerary
+                                tripId={tripId}
                                 title={`${trip?.userSelection?.location?.label} - ${trip?.userSelection?.noOfDays} Days Trip`}
                             />
                         </div>
