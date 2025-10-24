@@ -11,7 +11,6 @@ import ShareItinerary from '../../my-trips/components/ShareItinerary'; // adjust
 import HotelRecommendation from '../components/HotelRecommendation';
 import ComprehensiveItinerary from '../components/ComprehensiveItinerary';
 import BudgetBreakdown from '../components/BudgetBreakdown';
-import { HeroWithImage } from '@/components/custom/Hero';
 
 function Viewtrip() {
     const { tripId } = useParams();

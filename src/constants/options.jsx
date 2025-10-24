@@ -99,7 +99,67 @@ export const BudgetSliderConfig = {
     currency: '₹'
 }
 
-export const AI_PROMPT = `Generate a COMPREHENSIVE Travel Plan for Location: {location}, for {totalDays} Days for {traveler} with a {budget} budget. 
+export const TripThemes = [
+    {
+        id: 1,
+        title: 'Heritage & Culture',
+        desc: 'Explore historical sites, museums, and cultural landmarks',
+        icon: '🏛️',
+        value: 'heritage',
+        keywords: 'temples, monuments, museums, historical sites, cultural centers, heritage walks, traditional crafts, local art'
+    },
+    {
+        id: 2,
+        title: 'Adventure',
+        desc: 'Thrilling activities and outdoor experiences',
+        icon: '🏔️',
+        value: 'adventure',
+        keywords: 'trekking, hiking, water sports, rock climbing, paragliding, camping, wildlife safari, adventure parks'
+    },
+    {
+        id: 3,
+        title: 'Nightlife & Entertainment',
+        desc: 'Vibrant nightlife, clubs, and entertainment venues',
+        icon: '🎭',
+        value: 'nightlife',
+        keywords: 'nightclubs, bars, live music, theaters, entertainment districts, rooftop lounges, night markets, cultural shows'
+    },
+    {
+        id: 4,
+        title: 'Food & Culinary',
+        desc: 'Local cuisine, food tours, and culinary experiences',
+        icon: '🍜',
+        value: 'culinary',
+        keywords: 'local restaurants, street food, food tours, cooking classes, food markets, specialty cuisine, cafes, traditional dishes'
+    },
+    {
+        id: 5,
+        title: 'Wellness & Relaxation',
+        desc: 'Spa, yoga, meditation, and peaceful retreats',
+        icon: '🧘',
+        value: 'wellness',
+        keywords: 'spa, yoga centers, meditation retreats, wellness resorts, ayurveda, massage, peaceful gardens, nature walks'
+    },
+    {
+        id: 6,
+        title: 'Beach & Coastal',
+        desc: 'Beaches, water activities, and coastal experiences',
+        icon: '🏖️',
+        value: 'beach',
+        keywords: 'beaches, water sports, coastal walks, beach resorts, snorkeling, boat rides, seaside restaurants, sunset points'
+    }
+]
+
+export const AI_PROMPT = `Generate a COMPREHENSIVE Travel Plan for Location: {location}, for {totalDays} Days for {traveler} with a {budget} budget, focusing on {theme} theme. 
+
+🎯 THEME-SPECIFIC REQUIREMENTS:
+   - Primary Theme: {theme}
+   - Theme Keywords: {themeKeywords}
+   - PRIORITIZE activities, attractions, and experiences related to the selected theme
+   - At least 60% of daily activities should align with the theme
+   - Include theme-specific recommendations (e.g., best heritage sites for heritage theme, adventure activities for adventure theme)
+   - Suggest theme-appropriate timing (e.g., evening activities for nightlife, morning yoga for wellness)
+   - Recommend theme-specific local experts or guides when relevant
 
 ⚠️ ABSOLUTE CRITICAL REQUIREMENTS - FAILURE TO FOLLOW = INVALID RESPONSE:
 

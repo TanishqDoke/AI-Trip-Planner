@@ -9,5 +9,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: process.env.BASE_VITE_PATH || "/AI-Trip-Planner/"
+  define: {
+    'process.env': process.env
+  }
+  // base: process.env.BASE_VITE_PATH || "/AI-Trip-Planner/"
 })

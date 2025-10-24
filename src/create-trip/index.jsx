@@ -457,7 +457,7 @@
 // index.jsx
 
 import { Input } from '@/components/ui/input';
-import { AI_PROMPT, BudgetSliderConfig, SelectTravelList } from '@/constants/options';
+import { AI_PROMPT, BudgetSliderConfig, SelectTravelList, TripThemes } from '@/constants/options';
 import React, { useEffect, useState } from 'react'
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { Button } from '@/components/ui/button'
@@ -512,9 +512,9 @@ function CreateTrip() {
       return;
     }
 
-    if (!formData?.location || !formData?.noOfDays || !formData?.budget?.min || !formData?.budget?.max || !formData?.traveler) {
+    if (!formData?.location || !formData?.noOfDays || !formData?.theme || !formData?.budget?.min || !formData?.budget?.max || !formData?.traveler) {
       toast('Please fill all the details before generating your trip!', {
-        description: 'Make sure you\'ve selected destination, duration, budget, and travel companions.',
+        description: 'Make sure you\'ve selected destination, duration, theme, budget, and travel companions.',
       })
       return;
     }
@@ -529,11 +529,18 @@ function CreateTrip() {
     setLoading(true)
 
     try {
+      // Find the selected theme details
+      const selectedTheme = TripThemes.find(t => t.value === formData?.theme);
+      const themeTitle = selectedTheme ? selectedTheme.title : 'General';
+      const themeKeywords = formData?.themeKeywords || 'general sightseeing, popular attractions';
+
       const FINAL_PROMPT = AI_PROMPT
         .replace(/{location}/g, formData?.location?.label)
         .replace(/{totalDays}/g, formData?.noOfDays)
         .replace(/{traveler}/g, formData?.traveler)
         .replace(/{budget}/g, `${BudgetSliderConfig.currency}${formData?.budget?.min?.toLocaleString()} - ${BudgetSliderConfig.currency}${formData?.budget?.max?.toLocaleString()}`)
+        .replace(/{theme}/g, themeTitle)
+        .replace(/{themeKeywords}/g, themeKeywords)
 
       console.log('Generating trip for:', formData);
       console.log('Final AI Prompt:', FINAL_PROMPT);
@@ -716,7 +723,7 @@ function CreateTrip() {
     
     setBudgetRange(newRange);
     handleInputChange('budget', newRange);
-    if (newRange.min && newRange.max && currentStep === 3) setCurrentStep(4);
+    if (newRange.min && newRange.max && currentStep === 4) setCurrentStep(5);
   };
 
   const formatBudget = (value) => {
@@ -772,7 +779,7 @@ function CreateTrip() {
         <div className='mb-12'>
           <div className='bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50'>
             <div className='flex justify-between items-center mb-4'>
-              {[1, 2, 3, 4].map((step) => (
+              {[1, 2, 3, 4, 5].map((step) => (
                 <div key={step} className='flex items-center flex-1'>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
                     currentStep >= step 
@@ -781,7 +788,7 @@ function CreateTrip() {
                   }`}>
                     {step}
                   </div>
-                  {step < 4 && (
+                  {step < 5 && (
                     <div className={`flex-1 h-0.5 mx-3 transition-all duration-300 ${
                       currentStep > step ? 'bg-slate-900' : 'bg-slate-200'
                     }`}></div>
@@ -790,11 +797,12 @@ function CreateTrip() {
               ))}
             </div>
             <div className='text-center text-sm text-slate-600'>
-              <span className='font-medium'>Configuration Step {currentStep} of 4:</span>{' '}
+              <span className='font-medium'>Configuration Step {currentStep} of 5:</span>{' '}
               {
                 currentStep === 1 ? 'Destination Selection' :
                 currentStep === 2 ? 'Duration Parameters' :
-                currentStep === 3 ? 'Budget Configuration' :
+                currentStep === 3 ? 'Theme Selection' :
+                currentStep === 4 ? 'Budget Configuration' :
                 'Group Composition'
               }
             </div>
@@ -893,6 +901,49 @@ function CreateTrip() {
                 if (e.target.value && currentStep === 2) setCurrentStep(3);
               }} 
             />
+          </div>
+
+          {/* Theme Selection */}
+          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01' />
+                </svg>
+              </div>
+              <div>
+                <h2 className='text-xl font-semibold text-slate-800'>Trip Theme</h2>
+                <p className='text-sm text-slate-600'>Choose your travel experience focus</p>
+              </div>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              {TripThemes.map((theme, index) => (
+                <div 
+                  key={index}
+                  onClick={() => {
+                    setFormData({
+                      ...formData,
+                      theme: theme.value,
+                      themeKeywords: theme.keywords
+                    });
+                    if (currentStep === 3) setCurrentStep(4);
+                  }}
+                  className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md ${
+                    formData?.theme === theme.value 
+                      ? 'border-slate-400 bg-slate-50 shadow-md ring-2 ring-slate-200' 
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                  }`}
+                >
+                  <div className='flex items-start justify-between mb-3'>
+                    <div>
+                      <h3 className='text-lg font-semibold text-slate-800'>{theme.title}</h3>
+                      <p className='text-sm text-slate-600 mt-1'>{theme.desc}</p>
+                    </div>
+                    <div className='text-2xl opacity-60'>{theme.icon}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Budget Selection - Updated with Slider */}
