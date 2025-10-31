@@ -53,21 +53,21 @@ function Header() {
         {user ?
           <div className='flex items-center gap-3'>
             <a href="/create-trip">
-            <Button variant="outline" className="rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 font-medium">
-              Create Trip
-            </Button>
+              <Button variant="outline" className="rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 font-medium">
+                Create Trip
+              </Button>
             </a>
             <a href="/my-trips">
-            <Button variant="outline" className="rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 font-medium">
-              My Trips
-            </Button>
+              <Button variant="outline" className="rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 font-medium">
+                My Trips
+              </Button>
             </a>
             <Popover>
-              <PopoverTrigger>             
+              <PopoverTrigger>
                 <img src={user?.picture} alt="User Avatar" className='h-[36px] w-[36px] rounded-full border-2 border-slate-200 hover:border-slate-300 transition-all duration-300 cursor-pointer' />
               </PopoverTrigger>
               <PopoverContent className='bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg'>
-                <h2 className='cursor-pointer text-slate-700 hover:text-slate-900 font-medium py-2 px-4 rounded-lg hover:bg-slate-50 transition-all duration-300' onClick={()=>{
+                <h2 className='cursor-pointer text-slate-700 hover:text-slate-900 font-medium py-2 px-4 rounded-lg hover:bg-slate-50 transition-all duration-300' onClick={() => {
                   googleLogout();
                   localStorage.clear();
                   window.location.reload();
@@ -75,12 +75,12 @@ function Header() {
               </PopoverContent>
             </Popover>
 
-          </div> : <Button 
-                    onClick={()=>setOpenDialog(true)} 
-                    className='bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300'
-                  >
-                    Sign In
-                  </Button>}
+          </div> : <Button
+            onClick={() => setOpenDialog(true)}
+            className='bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300'
+          >
+            Sign In
+          </Button>}
       </div>
 
       <Dialog open={openDialog}>

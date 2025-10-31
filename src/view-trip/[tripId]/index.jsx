@@ -11,6 +11,7 @@ import ShareItinerary from '../../my-trips/components/ShareItinerary'; // adjust
 import HotelRecommendation from '../components/HotelRecommendation';
 import ComprehensiveItinerary from '../components/ComprehensiveItinerary';
 import BudgetBreakdown from '../components/BudgetBreakdown';
+import SelectedTravel from '../components/SelectedTravel';
 
 function Viewtrip() {
     const { tripId } = useParams();
@@ -75,7 +76,7 @@ function Viewtrip() {
                     </div>
                 )}
 
-                {/* Share Itinerary Section - Add this above the main content */}
+                {/* Share Itinerary Section */}
                 {trip && (
                     <div className='mt-8'>
                         <div className='bg-white rounded-2xl border border-slate-200 shadow-sm p-6'>
@@ -96,6 +97,11 @@ function Viewtrip() {
                             />
                         </div>
                     </div>
+                )}
+
+                {/* Selected Travel Section */}
+                {trip && (
+                    <SelectedTravel trip={trip} />
                 )}
 
                 {/* Main Content Grid */}

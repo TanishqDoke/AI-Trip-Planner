@@ -476,10 +476,166 @@ import { doc, setDoc } from "firebase/firestore";
 import { app, db } from '@/service/firebaseConfig';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
+import { generateTravelOptions } from '@/service/FlightService';
+
+// Travel Mode Selector Component
+const TravelModeSelector = ({ formData, onSelectTravel }) => {
+  const [travelOptions, setTravelOptions] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedMode, setSelectedMode] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+
+  // Get number of travelers
+  const getNumberOfTravelers = () => {
+    if (formData.numberOfPeople) {
+      return parseInt(formData.numberOfPeople);
+    }
+    // Parse from traveler string
+    const travelerStr = formData.traveler || '1';
+    if (travelerStr === 'Just Me') return 1;
+    if (travelerStr === 'A Couple') return 2;
+    return parseInt(travelerStr) || 1;
+  };
+
+  useEffect(() => {
+    const fetchTravelOptions = async () => {
+      if (!formData?.originCity || !formData?.location || !formData?.departureDate) return;
+      
+      setLoading(true);
+      try {
+        const options = await generateTravelOptions({
+          origin: formData.originCity.label,
+          destination: formData.location.label,
+          departureDate: formData.departureDate,
+          travelers: getNumberOfTravelers()
+        });
+        setTravelOptions(options);
+      } catch (error) {
+        console.error('Error fetching travel options:', error);
+        toast('Failed to load travel options', {
+          description: 'Please try again'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTravelOptions();
+  }, [formData?.originCity, formData?.location, formData?.departureDate, formData?.traveler, formData?.numberOfPeople]);
+
+  const handleSelectOption = (mode, option) => {
+    const travelers = getNumberOfTravelers();
+    const totalCost = option.price * travelers;
+    const selectedData = { ...option, mode, totalCost, travelers };
+    setSelectedOption(option.id);
+    setSelectedMode(mode);
+    onSelectTravel(selectedData);
+  };
+
+  const getTravelIcon = (mode) => {
+    switch(mode) {
+      case 'flight': return '✈️';
+      case 'train': return '🚆';
+      case 'bus': return '🚌';
+      default: return '🚗';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg border border-blue-100/50'>
+        <div className='flex items-center justify-center gap-3'>
+          <AiOutlineLoading3Quarters className='h-6 w-6 animate-spin text-slate-600' />
+          <span className='text-slate-600'>Loading travel options...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!travelOptions) return null;
+
+  const travelers = getNumberOfTravelers();
+
+  return (
+    <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+      <div className='flex items-center gap-4 mb-6'>
+        <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+          <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' />
+          </svg>
+        </div>
+        <div>
+          <h2 className='text-xl font-semibold text-slate-800'>Travel Mode</h2>
+          <p className='text-sm text-slate-600'>Choose your preferred mode of transport ({travelers} traveler{travelers > 1 ? 's' : ''})</p>
+        </div>
+      </div>
+
+      <div className='space-y-6'>
+        {['flight', 'train', 'bus'].map((mode) => {
+          const options = travelOptions[mode];
+          if (!options || !Array.isArray(options)) return null;
+
+          return (
+            <div key={mode} className='border-2 border-slate-200 rounded-xl p-6 bg-slate-50/50'>
+              <div className='flex items-center gap-3 mb-4'>
+                <div className='text-3xl'>{getTravelIcon(mode)}</div>
+                <h3 className='text-xl font-semibold text-slate-800 capitalize'>{mode} Options</h3>
+              </div>
+              
+              <div className='space-y-3'>
+                {options.map((option) => {
+                  const totalCost = option.price * travelers;
+                  const isSelected = selectedOption === option.id;
+
+                  return (
+                    <div
+                      key={option.id}
+                      onClick={() => handleSelectOption(mode, option)}
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-md bg-white ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 shadow-md ring-2 ring-blue-200'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <div className='flex items-center gap-2'>
+                            <h4 className='text-lg font-semibold text-slate-800'>{option.name}</h4>
+                            <span className='text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded'>{option.class}</span>
+                          </div>
+                          <div className='flex items-center gap-4 mt-2 text-sm text-slate-600'>
+                            <span>🕐 {option.duration}</span>
+                            <span>🛫 {option.departure}</span>
+                            <span>🛬 {option.arrival}</span>
+                          </div>
+                        </div>
+                        <div className='text-right'>
+                          <div className='text-sm text-slate-600'>₹{option.price.toLocaleString()}/person</div>
+                          <div className='text-xl font-bold text-blue-600'>₹{totalCost.toLocaleString()}</div>
+                          <div className='text-xs text-slate-500'>for {travelers} traveler{travelers > 1 ? 's' : ''}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 function CreateTrip() {
   const [place, setPlace] = useState();
-  const [formData, setFormData] = useState([]);
+  const [originPlace, setOriginPlace] = useState();
+  const [formData, setFormData] = useState({
+    budget: {
+      min: BudgetSliderConfig.defaultMin,
+      max: BudgetSliderConfig.defaultMax
+    }
+  });
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -491,18 +647,18 @@ function CreateTrip() {
   const navigate = useNavigate();
 
   const handleInputChange = (name, value) => {
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value
-    })
+    }))
   }
 
   useEffect(() => {
-    console.log(formData)
-    // Initialize budget in formData if not already set
-    if (!formData.budget) {
-      handleInputChange('budget', budgetRange);
-    }
+    console.log('FormData updated:', {
+      ...formData,
+      departureDate: formData.departureDate,
+      noOfDays: formData.noOfDays
+    })
   }, [formData])
 
   const onGenerateTrip = async () => {
@@ -512,9 +668,32 @@ function CreateTrip() {
       return;
     }
 
-    if (!formData?.location || !formData?.noOfDays || !formData?.theme || !formData?.budget?.min || !formData?.budget?.max || !formData?.traveler) {
+    // Debug logging to see what's missing
+    console.log('Form validation check:', {
+      originCity: formData?.originCity,
+      location: formData?.location,
+      noOfDays: formData?.noOfDays,
+      departureDate: formData?.departureDate,
+      theme: formData?.theme,
+      budgetMin: formData?.budget?.min,
+      budgetMax: formData?.budget?.max,
+      traveler: formData?.traveler
+    });
+
+    if (!formData?.originCity || !formData?.location || !formData?.noOfDays || !formData?.departureDate || !formData?.theme || !formData?.budget?.min || !formData?.budget?.max || !formData?.traveler || !formData?.selectedTravel) {
+      // Show which fields are missing
+      const missingFields = [];
+      if (!formData?.originCity) missingFields.push('Origin City');
+      if (!formData?.location) missingFields.push('Destination');
+      if (!formData?.noOfDays) missingFields.push('Number of Days');
+      if (!formData?.departureDate) missingFields.push('Departure Date');
+      if (!formData?.theme) missingFields.push('Theme');
+      if (!formData?.budget?.min || !formData?.budget?.max) missingFields.push('Budget');
+      if (!formData?.traveler) missingFields.push('Travel Group');
+      if (!formData?.selectedTravel) missingFields.push('Travel Mode');
+      
       toast('Please fill all the details before generating your trip!', {
-        description: 'Make sure you\'ve selected destination, duration, theme, budget, and travel companions.',
+        description: `Missing: ${missingFields.join(', ')}`,
       })
       return;
     }
@@ -723,7 +902,8 @@ function CreateTrip() {
     
     setBudgetRange(newRange);
     handleInputChange('budget', newRange);
-    if (newRange.min && newRange.max && currentStep === 4) setCurrentStep(5);
+    // Progress to next step automatically since budget is always valid
+    if (currentStep === 5) setCurrentStep(6);
   };
 
   const formatBudget = (value) => {
@@ -779,7 +959,7 @@ function CreateTrip() {
         <div className='mb-12'>
           <div className='bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50'>
             <div className='flex justify-between items-center mb-4'>
-              {[1, 2, 3, 4, 5].map((step) => (
+              {[1, 2, 3, 4, 5, 6, 7].map((step) => (
                 <div key={step} className='flex items-center flex-1'>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
                     currentStep >= step 
@@ -788,7 +968,7 @@ function CreateTrip() {
                   }`}>
                     {step}
                   </div>
-                  {step < 5 && (
+                  {step < 7 && (
                     <div className={`flex-1 h-0.5 mx-3 transition-all duration-300 ${
                       currentStep > step ? 'bg-slate-900' : 'bg-slate-200'
                     }`}></div>
@@ -797,13 +977,15 @@ function CreateTrip() {
               ))}
             </div>
             <div className='text-center text-sm text-slate-600'>
-              <span className='font-medium'>Configuration Step {currentStep} of 5:</span>{' '}
+              <span className='font-medium'>Configuration Step {currentStep} of 7:</span>{' '}
               {
-                currentStep === 1 ? 'Destination Selection' :
-                currentStep === 2 ? 'Duration Parameters' :
-                currentStep === 3 ? 'Theme Selection' :
-                currentStep === 4 ? 'Budget Configuration' :
-                'Group Composition'
+                currentStep === 1 ? 'Origin Selection' :
+                currentStep === 2 ? 'Destination Selection' :
+                currentStep === 3 ? 'Duration & Dates' :
+                currentStep === 4 ? 'Theme Selection' :
+                currentStep === 5 ? 'Budget Configuration' :
+                currentStep === 6 ? 'Group Composition' :
+                'Travel Mode Selection'
               }
             </div>
           </div>
@@ -811,6 +993,73 @@ function CreateTrip() {
 
         {/* Professional Form Sections */}
         <div className='space-y-8 create-trip-form'>
+          {/* Origin Selection */}
+          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50 relative z-50 overflow-visible'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
+                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' />
+                </svg>
+              </div>
+              <div>
+                <h2 className='text-xl font-semibold text-slate-800'>Starting From</h2>
+                <p className='text-sm text-slate-600'>Where will you start your journey?</p>
+              </div>
+            </div>
+            <div className='relative z-50'>
+              <GooglePlacesAutocomplete
+                apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
+                selectProps={{
+                  originPlace,
+                  onChange: (v) => { 
+                    setOriginPlace(v); 
+                    handleInputChange('originCity', v);
+                    if (v && currentStep === 1) setCurrentStep(2);
+                  },
+                  styles: {
+                    control: (provided) => ({
+                      ...provided,
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '12px',
+                      padding: '8px',
+                      fontSize: '16px',
+                      '&:hover': {
+                        borderColor: '#64748b',
+                      },
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      zIndex: 9999,
+                      position: 'absolute',
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                      marginTop: '4px',
+                    }),
+                    menuList: (provided) => ({
+                      ...provided,
+                      padding: '8px',
+                      maxHeight: '200px',
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isFocused ? '#f1f5f9' : 'white',
+                      color: '#334155',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      margin: '2px 0',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#f1f5f9',
+                      },
+                    }),
+                  },
+                }}
+              />
+            </div>
+          </div>
+
           {/* Destination Selection */}
           <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50 relative z-40 overflow-visible'>
             <div className='flex items-center gap-4 mb-6'>
@@ -822,7 +1071,7 @@ function CreateTrip() {
               </div>
               <div>
                 <h2 className='text-xl font-semibold text-slate-800'>Destination</h2>
-                <p className='text-sm text-slate-600'>Select your target location</p>
+                <p className='text-sm text-slate-600'>Where do you want to go?</p>
               </div>
             </div>
             <div className='relative z-50'>
@@ -833,7 +1082,7 @@ function CreateTrip() {
                   onChange: (v) => { 
                     setPlace(v); 
                     handleInputChange('location', v);
-                    if (v && currentStep === 1) setCurrentStep(2);
+                    if (v && currentStep === 2) setCurrentStep(3);
                   },
                   styles: {
                     control: (provided) => ({
@@ -888,19 +1137,59 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Duration</h2>
-                <p className='text-sm text-slate-600'>Trip length in days (1-10 recommended)</p>
+                <h2 className='text-xl font-semibold text-slate-800'>Duration & Travel Dates</h2>
+                <p className='text-sm text-slate-600'>Trip length and when you're traveling</p>
               </div>
             </div>
-            <Input 
-              placeholder='Enter number of days' 
-              type='number' 
-              className='text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300'
-              onChange={(e) => {
-                handleInputChange('noOfDays', e.target.value);
-                if (e.target.value && currentStep === 2) setCurrentStep(3);
-              }} 
-            />
+            <div className='space-y-4'>
+              <div>
+                <label className='text-sm font-medium text-slate-700 mb-2 block'>Number of Days</label>
+                <input 
+                  placeholder='Enter number of days' 
+                  type='number'
+                  value={formData.noOfDays || ''}
+                  className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-white'
+                  onChange={(e) => {
+                    console.log('Number of days changed:', e.target.value);
+                    handleInputChange('noOfDays', e.target.value);
+                  }} 
+                />
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div>
+                  <label className='text-sm font-medium text-slate-700 mb-2 block'>Departure Date</label>
+                  <input 
+                    type='date'
+                    value={formData.departureDate || ''}
+                    min={new Date().toISOString().split('T')[0]}
+                    className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-white'
+                    onChange={(e) => {
+                      console.log('Departure date changed:', e.target.value);
+                      handleInputChange('departureDate', e.target.value);
+                      // Auto-calculate return date
+                      if (e.target.value && formData.noOfDays) {
+                        const depDate = new Date(e.target.value);
+                        const retDate = new Date(depDate);
+                        retDate.setDate(depDate.getDate() + parseInt(formData.noOfDays));
+                        handleInputChange('returnDate', retDate.toISOString().split('T')[0]);
+                      }
+                      if (e.target.value && currentStep === 3) setCurrentStep(4);
+                    }} 
+                  />
+                </div>
+                <div>
+                  <label className='text-sm font-medium text-slate-700 mb-2 block'>Return Date (Auto-calculated)</label>
+                  <input 
+                    type='date'
+                    value={formData.returnDate || ''}
+                    min={formData.departureDate || new Date().toISOString().split('T')[0]}
+                    className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-slate-50'
+                    readOnly
+                  />
+                  <p className='text-xs text-slate-500 mt-1'>Automatically calculated from trip duration</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Theme Selection */}
@@ -926,7 +1215,7 @@ function CreateTrip() {
                       theme: theme.value,
                       themeKeywords: theme.keywords
                     });
-                    if (currentStep === 3) setCurrentStep(4);
+                    if (currentStep === 4) setCurrentStep(5);
                   }}
                   className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md ${
                     formData?.theme === theme.value 
@@ -1118,7 +1407,13 @@ function CreateTrip() {
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               {SelectTravelList.map((item, index) => (
                 <div key={index}
-                  onClick={() => handleInputChange('traveler', item.people)}
+                  onClick={() => {
+                    handleInputChange('traveler', item.people);
+                    // Don't auto-progress if Family or Friends (need to enter number)
+                    if (item.people !== '3-5 People' && item.people !== '5+ People' && currentStep === 6) {
+                      setCurrentStep(7);
+                    }
+                  }}
                   className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md ${
                     formData?.traveler === item.people 
                       ? 'border-slate-400 bg-slate-50 shadow-md ring-2 ring-slate-200' 
@@ -1135,7 +1430,39 @@ function CreateTrip() {
                 </div>
               ))}
             </div>
+
+            {/* Number of People Input - Show for Family and Friends */}
+            {(formData?.traveler === '3-5 People' || formData?.traveler === '5+ People') && (
+              <div className='mt-6 p-6 bg-blue-50 rounded-xl border-2 border-blue-200'>
+                <label className='text-sm font-medium text-slate-700 mb-2 block'>
+                  How many people are traveling?
+                </label>
+                <input
+                  type='number'
+                  min='1'
+                  max='20'
+                  value={formData.numberOfPeople || ''}
+                  placeholder='Enter number of people'
+                  className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-white'
+                  onChange={(e) => {
+                    handleInputChange('numberOfPeople', e.target.value);
+                    if (e.target.value && currentStep === 6) setCurrentStep(7);
+                  }}
+                />
+                <p className='text-xs text-slate-500 mt-2'>This will be used to calculate total travel costs</p>
+              </div>
+            )}
           </div>
+
+          {/* Travel Mode Selection - Show only after traveler is selected */}
+          {formData?.traveler && formData?.originCity && formData?.location && formData?.departureDate && (
+            <TravelModeSelector 
+              formData={formData}
+              onSelectTravel={(travelData) => {
+                handleInputChange('selectedTravel', travelData);
+              }}
+            />
+          )}
         </div>
 
         {/* Professional Generate Button */}
