@@ -1,4 +1,5 @@
 import React from 'react';
+import CostBreakdownPopover from './CostBreakdownPopover';
 
 function BudgetBreakdown({ trip }) {
     if (!trip || !trip.tripData) {
@@ -6,10 +7,11 @@ function BudgetBreakdown({ trip }) {
     }
 
     const days = parseInt(trip?.userSelection?.noOfDays || 1);
-    const estimatedTotal = days * 3500;
-    const estimatedMarket = Math.round(estimatedTotal * 1.42);
-    const estimatedSavings = estimatedMarket - estimatedTotal;
-    const estimatedPercentage = Math.round((estimatedSavings / estimatedMarket) * 100);
+    const estimates = trip?.tripData?.cost_estimates;
+    const estimatedTotal = estimates?.ai_optimized_price?.amount || (days * 3500);
+    const estimatedMarket = (estimates?.market_price && ((estimates.market_price.max || estimates.market_price.min) )) || Math.round(estimatedTotal * 1.42);
+    const estimatedSavings = Math.max(0, estimatedMarket - estimatedTotal);
+    const estimatedPercentage = estimatedMarket > 0 ? Math.round((estimatedSavings / estimatedMarket) * 100) : 0;
     
     function formatCurrency(amount) {
         return '₹' + amount.toLocaleString();
@@ -55,7 +57,13 @@ function BudgetBreakdown({ trip }) {
                     <div className='bg-green-50 rounded-lg p-4 border border-green-100'>
                         <p className='text-green-600 text-sm font-medium mb-1'>AI Optimized Price</p>
                         <p className='text-2xl font-bold text-green-700'>{formatCurrency(estimatedTotal)}</p>
-                        <p className='text-green-500 text-xs'>Our platform</p>
+                        <div className='flex justify-between items-center'>
+                            <p className='text-green-500 text-xs'>Our platform</p>
+                            <CostBreakdownPopover 
+                                breakdown={estimates?.breakdown} 
+                                formatCurrency={formatCurrency}
+                            />
+                        </div>
                     </div>
                 </div>
 

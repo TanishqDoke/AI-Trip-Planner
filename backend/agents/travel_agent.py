@@ -184,14 +184,21 @@ Make prices realistic for Indian market. Flights: ₹3000-15000, Trains: ₹500-
         try:
             response = self.model.generate_content(prompt)
             ai_itinerary = response.text
+            # Try to parse AI response as JSON. The model may return code fences or extra text,
+            # so use a helper to clean and parse. If parsing fails, keep raw text and return
+            # a clear parse error so frontend can handle it gracefully.
+            try:
+                parsed_itinerary = self._clean_and_parse_json(ai_itinerary)
+            except Exception as parse_err:
+                parsed_itinerary = None
+                parse_error_msg = str(parse_err)
             
             # Also search for actual flights and hotels
             flights = self.search_flights(origin, destination, start_date, end_date)
             hotels = self.search_hotels(destination, start_date, end_date)
-            
-            return {
+            result = {
                 'success': True,
-                'aiItinerary': ai_itinerary,
+                'aiItineraryRaw': ai_itinerary,
                 'availableFlights': flights.get('flights', [])[:3],  # Top 3
                 'availableHotels': hotels.get('hotels', [])[:3],  # Top 3
                 'destination': destination,
@@ -200,6 +207,15 @@ Make prices realistic for Indian market. Flights: ₹3000-15000, Trains: ₹500-
                     'end': end_date
                 }
             }
+
+            # If parsed JSON available, include it under aiItinerary. Otherwise include parse error.
+            if parsed_itinerary is not None:
+                result['aiItinerary'] = parsed_itinerary
+            else:
+                result['aiItinerary'] = None
+                result['parseError'] = parse_error_msg if 'parse_error_msg' in locals() else 'Failed to parse AI response as JSON'
+
+            return result
         
         except Exception as e:
             return {
@@ -226,3 +242,50 @@ Make prices realistic for Indian market. Flights: ₹3000-15000, Trains: ₹500-
             return response.text
         except:
             return f"Compare prices and timings to choose the best {travel_mode} option"
+
+    def _clean_and_parse_json(self, text):
+        """Clean common markdown/code-fence wrappers from AI response and parse JSON.
+
+        Attempts multiple heuristics: strip code fences, try direct json.loads, then
+        try extracting the largest JSON-like substring (object or array).
+        Raises ValueError if parsing fails.
+        """
+        if not text or not isinstance(text, str):
+            raise ValueError('AI response is empty or not a string')
+
+        s = text.strip()
+
+        # Remove leading ```json or ``` fences and the first line if needed
+        if s.startswith('```'):
+            # remove the first fence line
+            parts = s.splitlines()
+            if len(parts) > 1:
+                # drop the first line which may be ```json
+                s = '\n'.join(parts[1:])
+            else:
+                s = s[3:]
+
+        # Remove trailing ``` if present
+        if s.endswith('```'):
+            s = s.rsplit('```', 1)[0]
+
+        s = s.strip()
+
+        # Try direct JSON parse
+        try:
+            return json.loads(s)
+        except Exception as e:
+            last_exc = e
+
+        # Try to extract JSON object or array by finding first { or [ and last } or ]
+        for open_ch, close_ch in [('{', '}'), ('[', ']')]:
+            start = s.find(open_ch)
+            end = s.rfind(close_ch)
+            if start != -1 and end != -1 and end > start:
+                candidate = s[start:end+1]
+                try:
+                    return json.loads(candidate)
+                except Exception:
+                    continue
+
+        raise ValueError(f'Failed to parse JSON from AI response: {last_exc}')

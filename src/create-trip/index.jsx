@@ -835,6 +835,74 @@ function CreateTrip() {
         });
       }
 
+            const computeCostEstimates = async () => {
+        try {
+          const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
+          const days = parseInt(formData.noOfDays) || 1;
+
+          // Include selected travel cost in the prompt
+          const selectedTravelCost = formData?.selectedTravel?.totalCost || 0;
+          const prompt = `You are given a travel itinerary JSON and the user's selections. Using the itinerary and user selections, produce a realistic cost estimate in INR that is consistent with the user's budget range, number of days (${days}), number of travelers (${travelers}), and destination (${formData?.location?.label || formData.location || 'unknown'}). The user has already selected their travel mode (${formData?.selectedTravel?.mode || 'unknown'}) with a total cost of ₹${selectedTravelCost}. Respond ONLY in JSON with this shape:\n\n{\n  "market_price": {"min": <number>, "max": <number>, "currency": "INR"},\n  "ai_optimized_price": {"amount": <number>, "currency": "INR"},\n  "per_day_range": {"min": <number>, "max": <number>},\n  "per_person_total": {"amount": <number>},\n  "breakdown": {\n    "hotel": <number>,\n    "primary_transport": <number>,\n    "local_transport": <number>,\n    "food": <number>,\n    "activities": <number>\n  }\n}\n\nGuidelines:\n- IMPORTANT: The primary_transport cost MUST be exactly ${selectedTravelCost} to match the user's selected travel mode cost.\n- The local_transport cost should be estimated based on the itinerary locations, local taxi/bus/auto fares, and number of days.\n- For ${formData?.location?.label || 'the destination'}, estimate daily local transport costs considering:\n  * Distances between attractions in the itinerary\n  * Local transport options (taxi, auto, bus, etc.)\n  * Number of days (${days})\n  * Number of travelers (${travelers})\n- Ensure numbers are integers (no commas) and totals are internally consistent (breakdown sums approximately equal totals).\n- Base hotel/food/activities numbers on values found in the itinerary/hotels if available; otherwise infer sensible values for the destination and days.\n- Ensure the market price range aligns with the user's selected budget range (${formData?.budget?.min} - ${formData?.budget?.max}); do not produce totals wildly outside the budget.\n- AI optimized price should be a realistic total that includes both transport costs plus optimized costs for hotel, food, and activities.\n\nHere is the parsed tripData JSON:\n` + JSON.stringify(parsedTripData) + `\n\nHere is the user's selection JSON:\n` + JSON.stringify({ travelers, days, budget: formData?.budget, selectedTravel: formData?.selectedTravel }) + `\n`;
+
+          const result = await chatSession.sendMessage(prompt);
+          const text = result?.response?.text();
+          if (!text) throw new Error('No response from Gemini for cost estimates');
+
+          // Clean and parse the response
+          let cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          const start = cleaned.indexOf('{');
+          const end = cleaned.lastIndexOf('}');
+          if (start !== -1 && end !== -1) cleaned = cleaned.substring(start, end + 1);
+
+          const estimates = JSON.parse(cleaned);
+          return estimates;
+        } catch (err) {
+          console.warn('Gemini cost estimation failed, falling back to heuristic:', err);
+
+          // Fallback deterministic estimate based on budget / days / travelers
+          const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
+          const days = parseInt(formData.noOfDays) || 1;
+          const budgetMin = formData?.budget?.min || BudgetSliderConfig.defaultMin;
+          const budgetMax = formData?.budget?.max || BudgetSliderConfig.defaultMax;
+
+          const perPersonPerDayMin = Math.max(300, Math.floor(budgetMin / (travelers * days)));
+          const perPersonPerDayMax = Math.max(perPersonPerDayMin + 200, Math.ceil(budgetMax / (travelers * days)));
+
+          const market_min = Math.max(1000, budgetMin);
+          const market_max = Math.max(market_min + 500, budgetMax);
+          const marketAvg = Math.round((market_min + market_max) / 2);
+          const aiOpt = Math.round(marketAvg * 0.88); // ~12% savings
+
+          const breakdown = {
+            hotel: Math.round(marketAvg * 0.5),
+            transport: Math.round(marketAvg * 0.2),
+            food: Math.round(marketAvg * 0.2),
+            activities: Math.round(marketAvg * 0.1)
+          };
+
+          return {
+            market_price: { min: market_min, max: market_max, currency: 'INR' },
+            ai_optimized_price: { amount: aiOpt, currency: 'INR' },
+            per_day_range: { min: perPersonPerDayMin * travelers, max: perPersonPerDayMax * travelers },
+            per_person_total: { amount: Math.round((perPersonPerDayMin + perPersonPerDayMax) / 2 * days) },
+            breakdown
+          };
+        }
+      };
+
+      // compute estimates and merge into trip data
+      const estimates = await computeCostEstimates();
+      if (estimates) {
+        // attach estimates in a stable location
+        parsedTripData.cost_estimates = estimates;
+
+        // also ensure cost_breakdown.grand_total exists for backward compatibility
+        if (!parsedTripData.cost_breakdown) parsedTripData.cost_breakdown = {};
+        // prefer AI optimized amount as displayed total, fallback to market avg
+        const displayTotal = estimates.ai_optimized_price?.amount || Math.round(((estimates.market_price?.min || 0) + (estimates.market_price?.max || 0)) / 2);
+        parsedTripData.cost_breakdown.grand_total = `₹${displayTotal}`;
+      }
+
       await setDoc(doc(db, "AITrips", docId), {
         userSelection: {
           ...formData,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { GetDetailedPlaceInfo } from '@/service/GlobalApi'
+import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi'
 import { placesCache } from '@/service/PlacesCache'
 
 function ActivityCardItem({ activity, activityIndex, tripDestination }) {
@@ -85,16 +85,30 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
         window.open(mapsUrl, '_blank')
     }
 
+    // Helper to get activity image URL
+    const getActivityImage = () => {
+            if (placeDetails?.photos && placeDetails.photos.length > 0) {
+                // Use the buildPhotoUrl function imported at the top of the file
+                return buildPhotoUrl(placeDetails.photos[0].name)
+            }
+            return '/placeholder.jpg'
+        }
+
     return (
-        <div 
-            key={activityIndex} 
+        <div
+            key={activityIndex}
             className='border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all bg-white cursor-pointer'
             onClick={openInGoogleMaps}
         >
             <div className='flex gap-4'>
                 <div className='flex-shrink-0'>
-                    <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
-                         <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.24a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden'>
+                        <img
+                            src={getActivityImage()}
+                            alt={placeDetails?.displayName?.text || activityName}
+                            className='object-cover w-12 h-12 rounded-lg'
+                            onError={e => { e.target.src = '/placeholder.jpg' }}
+                        />
                     </div>
                 </div>
                 <div className='flex-1'>
@@ -104,15 +118,12 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                             <span className='text-xs text-slate-400'>• {activity.duration}</span>
                         )}
                     </div>
-                    
                     <h4 className='font-semibold text-slate-900 mb-1'>
                         {placeDetails?.displayName?.text || activityName}
                     </h4>
-                    
                     <p className='text-sm text-slate-600 mb-2'>
                         {activity.details || activity.description}
                     </p>
-
                     {placeDetails?.formattedAddress && (
                         <div className='flex items-center gap-1 mb-2'>
                             <svg className='w-3 h-3 text-slate-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -124,7 +135,6 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                             </span>
                         </div>
                     )}
-
                     {placeDetails?.rating && (
                         <div className='flex items-center gap-1 mb-2'>
                             <svg className='w-3 h-3 text-yellow-500' fill='currentColor' viewBox='0 0 24 24'>
@@ -135,21 +145,18 @@ function ActivityCardItem({ activity, activityIndex, tripDestination }) {
                             </span>
                         </div>
                     )}
-
                     <div className='flex items-center justify-between mt-2'>
                         {(activity.cost || activity.ticket_pricing) && (
                             <span className='inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded'>
                                 Cost: {activity.cost || activity.ticket_pricing}
                             </span>
                         )}
-                        
                         {loading && (
                             <div className='flex items-center gap-1'>
                                 <div className='w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin'></div>
                                 <span className='text-xs text-slate-500'>Getting location...</span>
                             </div>
                         )}
-
                         {placeDetails && (
                             <div className='flex items-center gap-1 text-blue-600'>
                                 <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
