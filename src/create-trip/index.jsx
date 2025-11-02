@@ -477,6 +477,7 @@ import { app, db } from '@/service/firebaseConfig';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
 import { generateTravelOptions } from '@/service/FlightService';
+import { weatherService } from '@/service/WeatherService';
 
 // Travel Mode Selector Component
 const TravelModeSelector = ({ formData, onSelectTravel }) => {
@@ -643,6 +644,8 @@ function CreateTrip() {
     min: BudgetSliderConfig.defaultMin,
     max: BudgetSliderConfig.defaultMax
   });
+  const [weatherData, setWeatherData] = useState(null);
+  const [loadingWeather, setLoadingWeather] = useState(false);
 
   const navigate = useNavigate();
 
@@ -652,6 +655,35 @@ function CreateTrip() {
       [name]: value
     }))
   }
+
+  // Fetch weather data when destination and departure date are selected
+  useEffect(() => {
+    const fetchWeather = async () => {
+      if (formData?.location?.label && formData?.departureDate && formData?.noOfDays) {
+        setLoadingWeather(true);
+        try {
+          const weather = await weatherService.getWeatherForecast(
+            formData.location.label,
+            formData.departureDate,
+            parseInt(formData.noOfDays)
+          );
+          setWeatherData(weather);
+          console.log('Weather data fetched for', formData.location.label, ':', weather);
+          
+          toast.success(`🌤️ Weather forecast loaded!`, {
+            description: `${weather.recommendations.weatherType} - ${weather.current.temperature}°C`
+          });
+        } catch (error) {
+          console.error('Weather fetch error:', error);
+          toast.info('Using general weather assumptions');
+        } finally {
+          setLoadingWeather(false);
+        }
+      }
+    };
+
+    fetchWeather();
+  }, [formData?.location, formData?.departureDate, formData?.noOfDays]);
 
   useEffect(() => {
     console.log('FormData updated:', {
@@ -713,7 +745,14 @@ function CreateTrip() {
       const themeTitle = selectedTheme ? selectedTheme.title : 'General';
       const themeKeywords = formData?.themeKeywords || 'general sightseeing, popular attractions';
 
-      const FINAL_PROMPT = AI_PROMPT
+      // Prepare weather information for prompt
+      let weatherPrompt = '';
+      if (weatherData) {
+        weatherPrompt = weatherService.formatWeatherForPrompt(weatherData);
+        console.log('Including weather-based recommendations in prompt');
+      }
+
+      let FINAL_PROMPT = AI_PROMPT
         .replace(/{location}/g, formData?.location?.label)
         .replace(/{totalDays}/g, formData?.noOfDays)
         .replace(/{traveler}/g, formData?.traveler)
@@ -721,10 +760,19 @@ function CreateTrip() {
         .replace(/{theme}/g, themeTitle)
         .replace(/{themeKeywords}/g, themeKeywords)
 
+      // Append weather-based recommendations to the prompt
+      if (weatherPrompt) {
+        FINAL_PROMPT += `\n\n${weatherPrompt}`;
+      }
+
       console.log('Generating trip for:', formData);
+      console.log('Weather data included:', !!weatherData);
       console.log('Final AI Prompt:', FINAL_PROMPT);
-      toast('🧠 AI is crafting your perfect itinerary...', {
-        description: 'This may take a few moments. Please wait.',
+      
+      toast('🧠 AI is crafting your weather-optimized itinerary...', {
+        description: weatherData 
+          ? `Based on ${weatherData.recommendations.weatherType} conditions` 
+          : 'This may take a few moments. Please wait.',
       });
 
       const result = await chatSession.sendMessage(FINAL_PROMPT);
@@ -1589,6 +1637,148 @@ function CreateTrip() {
               </div>
             </div>
           </div>
+
+          {/* Weather Forecast Widget */}
+          {(weatherData || loadingWeather) && formData?.location && formData?.departureDate && (
+            <div className='bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-lg p-6 shadow-lg border-2 border-blue-200'>
+              <div className='flex items-center justify-between mb-5'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg'>
+                    <span className='text-3xl'>🌤️</span>
+                  </div>
+                  <div>
+                    <h3 className='text-xl font-bold text-gray-900'>Weather Forecast & Recommendations</h3>
+                    <p className='text-sm text-gray-600'>{formData.location.label} • {new Date(formData.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  </div>
+                </div>
+                {loadingWeather && <AiOutlineLoading3Quarters className='animate-spin text-blue-600' size={24} />}
+              </div>
+
+              {weatherData && !loadingWeather && (
+                <div className='space-y-5'>
+                  {/* Current Weather & Forecast Summary */}
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <div className='bg-white rounded-xl p-5 shadow-md border border-blue-100'>
+                      <p className='text-xs font-semibold text-gray-500 uppercase mb-2'>Current Conditions</p>
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <p className='text-4xl font-bold text-gray-900'>{weatherData.current.temperature}°C</p>
+                          <p className='text-base text-gray-700 mt-1'>{weatherData.current.condition}</p>
+                          <p className='text-sm text-gray-500 mt-2'>Feels like {weatherData.current.feelsLike}°C</p>
+                        </div>
+                        <div className='text-right text-sm text-gray-600 space-y-1'>
+                          <p>💧 {weatherData.current.humidity}%</p>
+                          <p>🌬️ {weatherData.current.windSpeed} km/h</p>
+                          <p>☀️ UV {weatherData.current.uv}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className='bg-white rounded-xl p-5 shadow-md border border-blue-100'>
+                      <p className='text-xs font-semibold text-gray-500 uppercase mb-2'>Weather Type</p>
+                      <div className='flex items-center gap-3 mb-3'>
+                        <span className='px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full text-sm font-bold shadow-md'>
+                          {weatherData.recommendations.weatherType}
+                        </span>
+                      </div>
+                      <p className='text-sm text-gray-700 leading-relaxed'>
+                        {weatherData.recommendations.weatherSummary}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Detailed Recommendations in Tabs */}
+                  <div className='bg-white rounded-xl p-5 shadow-md border border-blue-100'>
+                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                      {/* Best Activities */}
+                      <div>
+                        <h4 className='font-bold text-gray-900 mb-3 flex items-center gap-2 text-base'>
+                          <span className='text-green-600'>✅</span>
+                          Recommended Activities
+                        </h4>
+                        <ul className='space-y-2.5'>
+                          {weatherData.recommendations.bestActivities.slice(0, 5).map((activity, idx) => (
+                            <li key={idx} className='flex items-start gap-2.5 text-sm text-gray-700 bg-green-50 p-2.5 rounded-lg border border-green-100'>
+                              <span className='text-green-600 mt-0.5 flex-shrink-0'>•</span>
+                              <span className='leading-relaxed'>{activity}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Places to Visit */}
+                      <div>
+                        <h4 className='font-bold text-gray-900 mb-3 flex items-center gap-2 text-base'>
+                          <span className='text-purple-600'>📍</span>
+                          Suggested Places
+                        </h4>
+                        <ul className='space-y-2.5'>
+                          {weatherData.recommendations.placesToVisit.slice(0, 5).map((place, idx) => (
+                            <li key={idx} className='flex items-start gap-2.5 text-sm text-gray-700 bg-purple-50 p-2.5 rounded-lg border border-purple-100'>
+                              <span className='text-purple-600 mt-0.5 flex-shrink-0'>•</span>
+                              <span className='leading-relaxed'>{place}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Clothing & Timing in Compact Layout */}
+                  <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+                    {/* Clothing Suggestions */}
+                    <div className='bg-white rounded-xl p-4 shadow-md border border-blue-100'>
+                      <h4 className='font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm'>
+                        <span>👕</span>
+                        What to Pack
+                      </h4>
+                      <div className='flex flex-wrap gap-2'>
+                        {weatherData.recommendations.clothingSuggestions.map((item, idx) => (
+                          <span key={idx} className='px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium border border-blue-200'>
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Timing Tips */}
+                    <div className='bg-amber-50 border-2 border-amber-200 rounded-xl p-4 shadow-md'>
+                      <h4 className='font-bold text-amber-900 mb-3 text-sm flex items-center gap-2'>
+                        <span>⏰</span>
+                        Best Timing
+                      </h4>
+                      <ul className='space-y-1.5'>
+                        {weatherData.recommendations.timingSuggestions.slice(0, 3).map((tip, idx) => (
+                          <li key={idx} className='flex items-start gap-2 text-xs text-amber-800'>
+                            <span className='mt-0.5'>•</span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* AI Integration Notice */}
+                  <div className='bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-4 border-2 border-indigo-200'>
+                    <p className='text-sm text-indigo-900 flex items-start gap-2'>
+                      <span className='text-xl'>🤖</span>
+                      <span className='leading-relaxed'>
+                        <strong>AI-Powered Optimization:</strong> These weather insights will be used to create your perfect itinerary, suggesting indoor activities during extreme conditions and outdoor adventures during pleasant weather. Your trip will be perfectly timed for the best experience!
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {loadingWeather && (
+                <div className='text-center py-8'>
+                  <AiOutlineLoading3Quarters className='animate-spin text-blue-600 mx-auto mb-3' size={32} />
+                  <p className='text-gray-600 font-medium'>Loading weather forecast...</p>
+                  <p className='text-sm text-gray-500 mt-1'>Analyzing conditions for your travel dates</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Theme Selection */}
           <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>

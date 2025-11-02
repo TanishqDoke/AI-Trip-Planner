@@ -49,7 +49,9 @@ function Header() {
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex justify-between items-center py-3'>
           <div className='flex items-center gap-8'>
-            <img src="/cerebro-professional.svg" alt="AI Travel Planner" className='h-12' />
+            <a href="/" className='cursor-pointer'>
+              <img src="/cerebro-professional.svg" alt="AI Travel Planner" className='h-12 hover:opacity-80 transition-opacity' />
+            </a>
             <nav className='hidden md:flex items-center gap-6'>
               <a href="/create-trip" className='text-gray-700 hover:text-[#2276E3] font-medium text-sm transition-colors'>
                 Plan Trip
