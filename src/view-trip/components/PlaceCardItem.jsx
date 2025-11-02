@@ -53,28 +53,28 @@ function PlaceCardItem({ place }) {
 
     return (
         <Link to={getGoogleMapsUrl()} target='_blank'>
-            <div className='border border-slate-200 rounded-xl p-4 hover:shadow-md transition-all bg-white'>
+            <div className='border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-[#2276E3] transition-all bg-white group'>
                 <div className='flex gap-4'>
                     <div className='relative'>
                         <img 
                             src={getPlaceImage()}
                             alt={placeName} 
-                            className='w-24 h-24 rounded-lg object-cover' 
+                            className='w-28 h-28 rounded-lg object-cover border-2 border-gray-100 group-hover:scale-105 transition-transform' 
                             onError={(e) => {
                                 e.target.src = '/placeholder.jpg'
                             }}
                         />
                         {loading && (
-                            <div className='absolute inset-0 bg-slate-100 rounded-lg flex items-center justify-center'>
-                                <div className='w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin'></div>
+                            <div className='absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center'>
+                                <div className='w-4 h-4 border-2 border-[#2276E3] border-t-transparent rounded-full animate-spin'></div>
                             </div>
                         )}
                     </div>
                     <div className='flex-1'>
-                        <h3 className='font-semibold text-slate-900 mb-2'>
+                        <h3 className='font-bold text-gray-900 mb-2 text-lg group-hover:text-[#2276E3] transition-colors'>
                             {placeDetails?.displayName?.text || placeName}
                         </h3>
-                        <p className='text-sm text-slate-600 mb-2'>
+                        <p className='text-sm text-gray-600 mb-2 line-clamp-2'>
                             {place?.details || place?.description}
                         </p>
                         

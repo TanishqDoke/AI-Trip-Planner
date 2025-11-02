@@ -208,7 +208,7 @@
 //                 </div>
 //               ))}
 //             </div>
-//             <div className='text-center text-sm text-slate-600'>
+//             <div className='text-center text-sm text-gray-600'>
 //               <span className='font-medium'>Configuration Step {currentStep} of 4:</span>{' '}
 //               {
 //                 currentStep === 1 ? 'Destination Selection' :
@@ -223,17 +223,17 @@
 //         {/* Professional Form Sections */}
 //         <div className='space-y-8 create-trip-form'>
 //           {/* Destination Selection */}
-//           <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50 relative z-40 overflow-visible'>
+//           <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200 relative z-40 overflow-visible'>
 //             <div className='flex items-center gap-4 mb-6'>
-//               <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-//                 <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+//               <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+//                 <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
 //                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
 //                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
 //                 </svg>
 //               </div>
 //               <div>
-//                 <h2 className='text-xl font-semibold text-slate-800'>Destination</h2>
-//                 <p className='text-sm text-slate-600'>Select your target location</p>
+//                 <h2 className='text-xl font-bold text-gray-900'>Destination</h2>
+//                 <p className='text-sm text-gray-600'>Select your target location</p>
 //               </div>
 //             </div>
 //             <div className='relative z-50'>
@@ -291,16 +291,16 @@
 //           </div>
 
 //           {/* Days Selection */}
-//           <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+//           <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
 //             <div className='flex items-center gap-4 mb-6'>
-//               <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-//                 <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+//               <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+//                 <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
 //                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
 //                 </svg>
 //               </div>
 //               <div>
-//                 <h2 className='text-xl font-semibold text-slate-800'>Duration</h2>
-//                 <p className='text-sm text-slate-600'>Trip length in days (1-10 recommended)</p>
+//                 <h2 className='text-xl font-bold text-gray-900'>Duration</h2>
+//                 <p className='text-sm text-gray-600'>Trip length in days (1-10 recommended)</p>
 //               </div>
 //             </div>
 //             <Input 
@@ -315,16 +315,16 @@
 //           </div>
 
 //           {/* Budget Selection */}
-//           <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+//           <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
 //             <div className='flex items-center gap-4 mb-6'>
-//               <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-//                 <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+//               <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+//                 <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
 //                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
 //                 </svg>
 //               </div>
 //               <div>
-//                 <h2 className='text-xl font-semibold text-slate-800'>Budget Range</h2>
-//                 <p className='text-sm text-slate-600'>Select your preferred spending range</p>
+//                 <h2 className='text-xl font-bold text-gray-900'>Budget Range</h2>
+//                 <p className='text-sm text-gray-600'>Select your preferred spending range</p>
 //               </div>
 //             </div>
 //             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
@@ -343,7 +343,7 @@
 //                   <div className='flex items-start justify-between mb-3'>
 //                     <div>
 //                       <h3 className='text-lg font-semibold text-slate-800'>{item.title}</h3>
-//                       <p className='text-sm text-slate-600 mt-1'>{item.desc}</p>
+//                       <p className='text-sm text-gray-600 mt-1'>{item.desc}</p>
 //                     </div>
 //                     <div className='text-2xl opacity-60'>{item.icon}</div>
 //                   </div>
@@ -353,16 +353,16 @@
 //           </div>
 
 //           {/* Travel Companions */}
-//           <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+//           <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
 //             <div className='flex items-center gap-4 mb-6'>
-//               <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-//                 <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+//               <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+//                 <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
 //                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
 //                 </svg>
 //               </div>
 //               <div>
-//                 <h2 className='text-xl font-semibold text-slate-800'>Travel Group</h2>
-//                 <p className='text-sm text-slate-600'>Select your travel companion type</p>
+//                 <h2 className='text-xl font-bold text-gray-900'>Travel Group</h2>
+//                 <p className='text-sm text-gray-600'>Select your travel companion type</p>
 //               </div>
 //             </div>
 //             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
@@ -378,7 +378,7 @@
 //                   <div className='flex items-start justify-between mb-3'>
 //                     <div>
 //                       <h3 className='text-lg font-semibold text-slate-800'>{item.title}</h3>
-//                       <p className='text-sm text-slate-600 mt-1'>{item.desc}</p>
+//                       <p className='text-sm text-gray-600 mt-1'>{item.desc}</p>
 //                     </div>
 //                     <div className='text-2xl opacity-60'>{item.icon}</div>
 //                   </div>
@@ -557,16 +557,16 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
   const travelers = getNumberOfTravelers();
 
   return (
-    <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+    <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
       <div className='flex items-center gap-4 mb-6'>
-        <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-          <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+        <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+          <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' />
           </svg>
         </div>
         <div>
-          <h2 className='text-xl font-semibold text-slate-800'>Travel Mode</h2>
-          <p className='text-sm text-slate-600'>Choose your preferred mode of transport ({travelers} traveler{travelers > 1 ? 's' : ''})</p>
+          <h2 className='text-xl font-bold text-gray-900'>Travel Mode</h2>
+          <p className='text-sm text-gray-600'>Choose your preferred mode of transport ({travelers} traveler{travelers > 1 ? 's' : ''})</p>
         </div>
       </div>
 
@@ -579,7 +579,7 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
             <div key={mode} className='border-2 border-slate-200 rounded-xl p-6 bg-slate-50/50'>
               <div className='flex items-center gap-3 mb-4'>
                 <div className='text-3xl'>{getTravelIcon(mode)}</div>
-                <h3 className='text-xl font-semibold text-slate-800 capitalize'>{mode} Options</h3>
+                <h3 className='text-xl font-bold text-gray-900 capitalize'>{mode} Options</h3>
               </div>
               
               <div className='space-y-3'>
@@ -603,14 +603,14 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
                             <h4 className='text-lg font-semibold text-slate-800'>{option.name}</h4>
                             <span className='text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded'>{option.class}</span>
                           </div>
-                          <div className='flex items-center gap-4 mt-2 text-sm text-slate-600'>
+                          <div className='flex items-center gap-4 mt-2 text-sm text-gray-600'>
                             <span>🕐 {option.duration}</span>
                             <span>🛫 {option.departure}</span>
                             <span>🛬 {option.arrival}</span>
                           </div>
                         </div>
                         <div className='text-right'>
-                          <div className='text-sm text-slate-600'>₹{option.price.toLocaleString()}/person</div>
+                          <div className='text-sm text-gray-600'>₹{option.price.toLocaleString()}/person</div>
                           <div className='text-xl font-bold text-blue-600'>₹{totalCost.toLocaleString()}</div>
                           <div className='text-xs text-slate-500'>for {travelers} traveler{travelers > 1 ? 's' : ''}</div>
                         </div>
@@ -1233,66 +1233,58 @@ function CreateTrip() {
   };
 
   return (
-    <div className='relative min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-blue-50/30'>
-      {/* Professional grid background */}
-      <div className='absolute inset-0 bg-[linear-gradient(to_right,#dbeafe_1px,transparent_1px),linear-gradient(to_bottom,#dbeafe_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20'></div>
-      
-      {/* Subtle blue accent elements */}
-      <div className='absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-100/30 to-blue-200/40 rounded-2xl rotate-12 opacity-40'></div>
-      <div className='absolute top-60 right-20 w-20 h-20 bg-gradient-to-br from-blue-200/40 to-blue-300/50 rounded-xl -rotate-12 opacity-50'></div>
-      
-      <div className='relative max-w-5xl mx-auto px-6 py-12'>
-        {/* Back Button */}
-        <div className='flex items-center gap-2 mb-6'>
-          <button
-            onClick={() => navigate(-1)}
-            className='flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors'
-          >
-            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
-            </svg>
-            <span className='font-medium'>Back</span>
-          </button>
-        </div>
-
-        {/* Professional Header Section */}
-        <div className='text-center mb-16'>
-          <div className='flex items-center justify-center gap-4 mb-8'>
-            <img src="/cerebro-professional.svg" alt="CerebroCraft" className='h-16' />
+    <div className='relative min-h-screen bg-white'>
+      {/* EaseMyTrip Style Header Banner */}
+      <div className='bg-gradient-to-r from-[#2276E3] to-[#1565C0] text-white py-12'>
+        <div className='max-w-6xl mx-auto px-4'>
+          {/* Back Button */}
+          <div className='flex items-center gap-2 mb-6'>
+            <button
+              onClick={() => navigate(-1)}
+              className='flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors'
+            >
+              <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+              </svg>
+              <span className='font-semibold'>Back</span>
+            </button>
           </div>
-          <h1 className='font-bold text-4xl md:text-5xl mb-6 text-slate-900'>
-            AI Travel Planning Console
-          </h1>
-          <p className='text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed'>
-            Configure your travel parameters to generate an optimized itinerary powered by 
-            <span className='text-slate-800 font-semibold'> advanced AI algorithms</span>
-          </p>
-          <div className='w-24 h-0.5 bg-gradient-to-r from-slate-400 to-blue-500 mx-auto mt-6'></div>
-        </div>
 
-        {/* Professional Progress Indicator */}
-        <div className='mb-12'>
-          <div className='bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50'>
+          <div className='text-center'>
+            <h1 className='font-bold text-4xl md:text-5xl mb-4'>
+              Plan Your Perfect Trip
+            </h1>
+            <p className='text-xl text-blue-100 max-w-3xl mx-auto'>
+              Tell us your preferences and let AI create your personalized itinerary
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div className='relative max-w-6xl mx-auto px-4 py-8'>
+        {/* EaseMyTrip Style Progress Steps */}
+        <div className='mb-10'>
+          <div className='bg-white rounded-lg p-6 shadow-md border-2 border-gray-200'>
             <div className='flex justify-between items-center mb-4'>
               {[1, 2, 3, 4, 5, 6, 7].map((step) => (
                 <div key={step} className='flex items-center flex-1'>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${
                     currentStep >= step 
-                      ? 'bg-slate-900 text-white shadow-sm' 
-                      : 'bg-slate-200 text-slate-500'
+                      ? 'bg-[#2276E3] text-white shadow-md scale-110' 
+                      : 'bg-gray-200 text-gray-400'
                   }`}>
                     {step}
                   </div>
                   {step < 7 && (
-                    <div className={`flex-1 h-0.5 mx-3 transition-all duration-300 ${
-                      currentStep > step ? 'bg-slate-900' : 'bg-slate-200'
+                    <div className={`flex-1 h-1 mx-3 transition-all duration-300 ${
+                      currentStep > step ? 'bg-[#2276E3]' : 'bg-gray-300'
                     }`}></div>
                   )}
                 </div>
               ))}
             </div>
-            <div className='text-center text-sm text-slate-600'>
-              <span className='font-medium'>Configuration Step {currentStep} of 7:</span>{' '}
+            <div className='text-center text-sm text-gray-700'>
+              <span className='font-bold'>Step {currentStep} of 7:</span>{' '}
               {
                 currentStep === 1 ? 'Origin Selection' :
                 currentStep === 2 ? 'Destination Selection' :
@@ -1306,19 +1298,19 @@ function CreateTrip() {
           </div>
         </div>
 
-        {/* Professional Form Sections */}
-        <div className='space-y-8 create-trip-form'>
+        {/* EaseMyTrip Style Form Sections */}
+        <div className='space-y-6 create-trip-form'>
           {/* Origin Selection */}
-          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50 relative z-50 overflow-visible'>
+          <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200 relative z-50 overflow-visible'>
             <div className='flex items-center gap-4 mb-6'>
-              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+                <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Starting From</h2>
-                <p className='text-sm text-slate-600'>Where will you start your journey?</p>
+                <h2 className='text-xl font-bold text-gray-900'>Starting From</h2>
+                <p className='text-sm text-gray-600'>Where will you start your journey?</p>
               </div>
             </div>
             <div className='relative z-50'>
@@ -1376,17 +1368,17 @@ function CreateTrip() {
           </div>
 
           {/* Destination Selection */}
-          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50 relative z-40 overflow-visible'>
+          <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200 relative z-40 overflow-visible'>
             <div className='flex items-center gap-4 mb-6'>
-              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <div className='w-12 h-12 bg-[#D32F2F] rounded-lg flex items-center justify-center'>
+                <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Destination</h2>
-                <p className='text-sm text-slate-600'>Where do you want to go?</p>
+                <h2 className='text-xl font-bold text-gray-900'>Destination</h2>
+                <p className='text-sm text-gray-600'>Where do you want to go?</p>
               </div>
             </div>
             <div className='relative z-50'>
@@ -1444,16 +1436,16 @@ function CreateTrip() {
           </div>
 
           {/* Days Selection */}
-          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+          <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
             <div className='flex items-center gap-4 mb-6'>
-              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+                <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Duration & Travel Dates</h2>
-                <p className='text-sm text-slate-600'>Trip length and when you're traveling</p>
+                <h2 className='text-xl font-bold text-gray-900'>Duration & Travel Dates</h2>
+                <p className='text-sm text-gray-600'>Trip length and when you're traveling</p>
               </div>
             </div>
             <div className='space-y-4'>
@@ -1508,16 +1500,16 @@ function CreateTrip() {
           </div>
 
           {/* Theme Selection */}
-          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+          <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
             <div className='flex items-center gap-4 mb-6'>
-              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+                <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Trip Theme</h2>
-                <p className='text-sm text-slate-600'>Choose your travel experience focus</p>
+                <h2 className='text-xl font-bold text-gray-900'>Trip Theme</h2>
+                <p className='text-sm text-gray-600'>Choose your travel experience focus</p>
               </div>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
@@ -1541,7 +1533,7 @@ function CreateTrip() {
                   <div className='flex items-start justify-between mb-3'>
                     <div>
                       <h3 className='text-lg font-semibold text-slate-800'>{theme.title}</h3>
-                      <p className='text-sm text-slate-600 mt-1'>{theme.desc}</p>
+                      <p className='text-sm text-gray-600 mt-1'>{theme.desc}</p>
                     </div>
                     <div className='text-2xl opacity-60'>{theme.icon}</div>
                   </div>
@@ -1551,16 +1543,16 @@ function CreateTrip() {
           </div>
 
           {/* Budget Selection - Updated with Slider */}
-          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+          <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
             <div className='flex items-center gap-4 mb-6'>
-              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+                <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Budget Range</h2>
-                <p className='text-sm text-slate-600'>Set your total trip budget</p>
+                <h2 className='text-xl font-bold text-gray-900'>Budget Range</h2>
+                <p className='text-sm text-gray-600'>Set your total trip budget</p>
               </div>
             </div>
             
@@ -1570,7 +1562,7 @@ function CreateTrip() {
                 <div className='text-3xl font-bold text-slate-800 mb-2'>
                   {formatBudgetRange(budgetRange?.min, budgetRange?.max)}
                 </div>
-                <p className='text-sm text-slate-600'>Budget range for entire trip</p>
+                <p className='text-sm text-gray-600'>Budget range for entire trip</p>
               </div>
 
               {/* Dual Range Slider with Buttons */}
@@ -1707,16 +1699,16 @@ function CreateTrip() {
           </div>
 
           {/* Travel Companions */}
-          <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg hover:shadow-blue-xl transition-all duration-300 border border-blue-100/50'>
+          <div className='bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-gray-200'>
             <div className='flex items-center gap-4 mb-6'>
-              <div className='w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center'>
-                <svg className='w-6 h-6 text-slate-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <div className='w-12 h-12 bg-[#2276E3] rounded-lg flex items-center justify-center'>
+                <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-semibold text-slate-800'>Travel Group</h2>
-                <p className='text-sm text-slate-600'>Select your travel companion type</p>
+                <h2 className='text-xl font-bold text-gray-900'>Travel Group</h2>
+                <p className='text-sm text-gray-600'>Select your travel companion type</p>
               </div>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
@@ -1738,7 +1730,7 @@ function CreateTrip() {
                   <div className='flex items-start justify-between mb-3'>
                     <div>
                       <h3 className='text-lg font-semibold text-slate-800'>{item.title}</h3>
-                      <p className='text-sm text-slate-600 mt-1'>{item.desc}</p>
+                      <p className='text-sm text-gray-600 mt-1'>{item.desc}</p>
                     </div>
                     <div className='text-2xl opacity-60'>{item.icon}</div>
                   </div>
@@ -1780,12 +1772,12 @@ function CreateTrip() {
           )}
         </div>
 
-        {/* Professional Generate Button */}
+        {/* EaseMyTrip Generate Button */}
         <div className='mt-12 text-center'>
           <Button 
             disabled={loading} 
             onClick={onGenerateTrip}
-            className='bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0 min-w-[240px] disabled:opacity-60 disabled:cursor-not-allowed'
+            className='bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-10 py-4 text-lg font-bold rounded-md shadow-lg hover:shadow-xl transition-all duration-200 border-0 min-w-[280px] disabled:opacity-60 disabled:cursor-not-allowed'
           >
             {loading ? (
               <div className='flex items-center gap-3'>
@@ -1843,3 +1835,5 @@ function CreateTrip() {
 }
 
 export default CreateTrip
+
+
