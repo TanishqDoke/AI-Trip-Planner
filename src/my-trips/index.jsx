@@ -4,12 +4,16 @@ import { useNavigation, useNavigate } from 'react-router-dom';
 import { query, where, getDocs } from "firebase/firestore";
 import { db } from '@/service/firebaseConfig';
 import UserTripCardItem from './components/UserTripCardItem';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslation } from '@/translations/translations';
 //import ShareItinerary from './components/ShareItinerary';
 
 function MyTrips() {
     const navigation = useNavigation();
     const navigate = useNavigate();
     const [userTrips, setUserTrips] = useState([])
+    const { language } = useLanguage();
+    const t = (key) => getTranslation(language, key);
 
     useEffect(() => {
         GetUserTrips();
@@ -43,7 +47,7 @@ function MyTrips() {
                         <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
                         </svg>
-                        <span className='font-semibold'>Back</span>
+                        <span className='font-semibold'>{t('back')}</span>
                     </button>
                 </div>
 
@@ -52,14 +56,14 @@ function MyTrips() {
                     <div className='bg-gradient-to-r from-[#2276E3] to-[#1565C0] text-white rounded-lg p-8 mb-6'>
                         <div className='flex items-center justify-between flex-wrap gap-4'>
                             <div>
-                                <h1 className='text-3xl md:text-4xl font-bold mb-2'>My Trips</h1>
-                                <p className='text-blue-100 text-lg'>View and manage all your travel plans</p>
+                                <h1 className='text-3xl md:text-4xl font-bold mb-2'>{t('myTripsTitle')}</h1>
+                                <p className='text-blue-100 text-lg'>{t('myTripsSubtitle')}</p>
                             </div>
                             <button
                                 onClick={() => navigate('/create-trip')}
                                 className='bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-6 py-3 rounded-md font-bold shadow-lg hover:shadow-xl transition-all duration-200 uppercase'
                             >
-                                + Create New Trip
+                                {t('createNewTrip')}
                             </button>
                         </div>
                     </div>
@@ -75,7 +79,7 @@ function MyTrips() {
                                 </div>
                                 <div>
                                     <p className='text-3xl font-bold text-gray-800'>{userTrips?.length || 0}</p>
-                                    <p className='text-sm text-gray-600 font-medium'>Total Trips</p>
+                                    <p className='text-sm text-gray-600 font-medium'>{t('totalTrips')}</p>
                                 </div>
                             </div>
                         </div>
@@ -88,7 +92,7 @@ function MyTrips() {
                                 </div>
                                 <div>
                                     <p className='text-3xl font-bold text-gray-800'>{userTrips?.length > 0 ? new Set(userTrips.map(trip => trip.userSelection?.location?.label)).size : 0}</p>
-                                    <p className='text-sm text-gray-600 font-medium'>Destinations</p>
+                                    <p className='text-sm text-gray-600 font-medium'>{t('destinations')}</p>
                                 </div>
                             </div>
                         </div>
@@ -101,7 +105,7 @@ function MyTrips() {
                                 </div>
                                 <div>
                                     <p className='text-3xl font-bold text-gray-800'>{userTrips?.reduce((sum, trip) => sum + (parseInt(trip.userSelection?.noOfDays) || 0), 0) || 0}</p>
-                                    <p className='text-sm text-gray-600 font-medium'>Total Days</p>
+                                    <p className='text-sm text-gray-600 font-medium'>{t('totalDays')}</p>
                                 </div>
                             </div>
                         </div>
@@ -110,7 +114,7 @@ function MyTrips() {
 
                 {/* Trips Grid - EaseMyTrip Style */}
                 <div className='mb-6'>
-                    <h2 className='text-2xl font-bold text-gray-800 mb-4'>Your Itineraries</h2>
+                    <h2 className='text-2xl font-bold text-gray-800 mb-4'>{t('yourItineraries')}</h2>
                 </div>
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                     {userTrips?.length > 0 ? userTrips.map((trip, index) => (
@@ -137,10 +141,10 @@ function MyTrips() {
                                     <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
                                 </svg>
                             </div>
-                            <h3 className='text-2xl font-bold text-gray-800 mb-3'>No Trips Yet!</h3>
-                            <p className='text-gray-600 mb-8 text-lg'>Start planning your dream vacation with AI-powered itineraries</p>
+                            <h3 className='text-2xl font-bold text-gray-800 mb-3'>{t('noTripsYet')}</h3>
+                            <p className='text-gray-600 mb-8 text-lg'>{t('startPlanningDream')}</p>
                             <a href="/create-trip" className='inline-block bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-8 py-3 rounded-md font-bold shadow-lg hover:shadow-xl transition-all duration-200 uppercase'>
-                                Plan Your First Trip
+                                {t('planFirstTrip')}
                             </a>
                         </div>
                     </div>

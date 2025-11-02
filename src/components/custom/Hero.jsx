@@ -3,9 +3,14 @@ import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi';
 import { placesCache } from '@/service/PlacesCache';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslation } from '@/translations/translations';
 
 // EaseMyTrip-inspired Hero component with search-focused design
 function Hero() {
+  const { language } = useLanguage();
+  const t = (key) => getTranslation(language, key);
+  
   return (
     <div className='relative min-h-screen bg-white'>
       {/* Hero Banner Section - EaseMyTrip Style */}
@@ -18,10 +23,10 @@ function Hero() {
           {/* Main Heading */}
           <div className='text-center mb-12'>
             <h1 className='font-bold text-4xl md:text-5xl lg:text-6xl mb-4'>
-              Plan Your Perfect Trip with AI
+              {t('planPerfectTripAI')}
             </h1>
             <p className='text-xl md:text-2xl text-blue-100'>
-              Personalized itineraries in seconds • Best prices guaranteed • 24/7 Support
+              {t('personalizedItineraries')}
             </p>
           </div>
 
@@ -29,7 +34,7 @@ function Hero() {
           <div className='flex justify-center mb-8'>
             <Link to={'/create-trip'}>
               <Button className='bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-10 py-4 text-lg font-bold rounded-md shadow-xl hover:shadow-2xl transition-all duration-200 uppercase'>
-                Start Planning Now
+                {t('startPlanningNow')}
               </Button>
             </Link>
           </div>
@@ -38,19 +43,19 @@ function Hero() {
           <div className='grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto'>
             <div className='text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20'>
               <div className='text-3xl font-bold mb-1'>500K+</div>
-              <div className='text-sm text-blue-100'>Happy Travelers</div>
+              <div className='text-sm text-blue-100'>{t('happyTravelers')}</div>
             </div>
             <div className='text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20'>
               <div className='text-3xl font-bold mb-1'>150+</div>
-              <div className='text-sm text-blue-100'>Destinations</div>
+              <div className='text-sm text-blue-100'>{t('destinations')}</div>
             </div>
             <div className='text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20'>
               <div className='text-3xl font-bold mb-1'>2.5s</div>
-              <div className='text-sm text-blue-100'>Avg Response Time</div>
+              <div className='text-sm text-blue-100'>{t('avgResponseTime')}</div>
             </div>
             <div className='text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20'>
               <div className='text-3xl font-bold mb-1'>24/7</div>
-              <div className='text-sm text-blue-100'>Support Available</div>
+              <div className='text-sm text-blue-100'>{t('supportAvailable')}</div>
             </div>
           </div>
         </div>
@@ -60,8 +65,8 @@ function Hero() {
       <div className='max-w-7xl mx-auto px-4 py-16'>
         {/* Why Choose Us */}
         <div className='text-center mb-12'>
-          <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-3'>Why Plan With Us?</h2>
-          <p className='text-lg text-gray-600'>Experience the best in AI-powered travel planning</p>
+          <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-3'>{t('whyPlanWithUs')}</h2>
+          <p className='text-lg text-gray-600'>{t('experienceBest')}</p>
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-16'>
@@ -71,8 +76,8 @@ function Hero() {
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
               </svg>
             </div>
-            <h3 className='font-bold text-lg text-gray-800 mb-2'>Instant Planning</h3>
-            <p className='text-gray-600 text-sm'>Get your complete itinerary in seconds, not hours</p>
+            <h3 className='font-bold text-lg text-gray-800 mb-2'>{t('instantPlanning')}</h3>
+            <p className='text-gray-600 text-sm'>{t('instantPlanningDesc')}</p>
           </div>
 
           <div className='text-center p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100'>
@@ -81,8 +86,8 @@ function Hero() {
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
               </svg>
             </div>
-            <h3 className='font-bold text-lg text-gray-800 mb-2'>Best Price</h3>
-            <p className='text-gray-600 text-sm'>Optimized recommendations within your budget</p>
+            <h3 className='font-bold text-lg text-gray-800 mb-2'>{t('bestPrice')}</h3>
+            <p className='text-gray-600 text-sm'>{t('bestPriceDesc')}</p>
           </div>
 
           <div className='text-center p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100'>
@@ -91,8 +96,8 @@ function Hero() {
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
               </svg>
             </div>
-            <h3 className='font-bold text-lg text-gray-800 mb-2'>AI Personalization</h3>
-            <p className='text-gray-600 text-sm'>Tailored recommendations based on your preferences</p>
+            <h3 className='font-bold text-lg text-gray-800 mb-2'>{t('aiPersonalization')}</h3>
+            <p className='text-gray-600 text-sm'>{t('aiPersonalizationDesc')}</p>
           </div>
 
           <div className='text-center p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100'>
@@ -101,8 +106,8 @@ function Hero() {
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129' />
               </svg>
             </div>
-            <h3 className='font-bold text-lg text-gray-800 mb-2'>Multiple Destinations</h3>
-            <p className='text-gray-600 text-sm'>Plan trips across 150+ countries worldwide</p>
+            <h3 className='font-bold text-lg text-gray-800 mb-2'>{t('multipleDestinations')}</h3>
+            <p className='text-gray-600 text-sm'>{t('multipleDestinationsDesc')}</p>
           </div>
         </div>
 
@@ -110,12 +115,12 @@ function Hero() {
         <div className='bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-8 border-2 border-dashed border-[#D32F2F] mb-16'>
           <div className='flex flex-col md:flex-row items-center justify-between gap-6'>
             <div>
-              <h3 className='text-2xl font-bold text-gray-800 mb-2'>Special Offer! 🎉</h3>
-              <p className='text-gray-700 text-lg'>Get your first AI-generated itinerary absolutely FREE</p>
+              <h3 className='text-2xl font-bold text-gray-800 mb-2'>{t('specialOffer')}</h3>
+              <p className='text-gray-700 text-lg'>{t('firstItineraryFree')}</p>
             </div>
             <Link to={'/create-trip'}>
               <Button className='bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-8 py-3 text-base font-bold rounded-md shadow-lg uppercase'>
-                Claim Offer
+                {t('claimOffer')}
               </Button>
             </Link>
           </div>
@@ -123,28 +128,28 @@ function Hero() {
 
         {/* How It Works */}
         <div className='bg-gray-50 rounded-xl p-8 md:p-12'>
-          <h2 className='text-3xl font-bold text-gray-800 mb-8 text-center'>How It Works</h2>
+          <h2 className='text-3xl font-bold text-gray-800 mb-8 text-center'>{t('howItWorks')}</h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
             <div className='text-center'>
               <div className='w-20 h-20 bg-[#2276E3] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold'>
                 1
               </div>
-              <h3 className='font-bold text-xl text-gray-800 mb-2'>Enter Details</h3>
-              <p className='text-gray-600'>Tell us your destination, dates, budget, and interests</p>
+              <h3 className='font-bold text-xl text-gray-800 mb-2'>{t('enterDetails')}</h3>
+              <p className='text-gray-600'>{t('enterDetailsDesc')}</p>
             </div>
             <div className='text-center'>
               <div className='w-20 h-20 bg-[#2276E3] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold'>
                 2
               </div>
-              <h3 className='font-bold text-xl text-gray-800 mb-2'>AI Magic</h3>
-              <p className='text-gray-600'>Our AI analyzes thousands of options to create your perfect plan</p>
+              <h3 className='font-bold text-xl text-gray-800 mb-2'>{t('aiMagic')}</h3>
+              <p className='text-gray-600'>{t('aiMagicDesc')}</p>
             </div>
             <div className='text-center'>
               <div className='w-20 h-20 bg-[#2276E3] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold'>
                 3
               </div>
-              <h3 className='font-bold text-xl text-gray-800 mb-2'>Get Itinerary</h3>
-              <p className='text-gray-600'>Receive a complete day-by-day plan with hotels and activities</p>
+              <h3 className='font-bold text-xl text-gray-800 mb-2'>{t('getItinerary')}</h3>
+              <p className='text-gray-600'>{t('getItineraryDesc')}</p>
             </div>
           </div>
         </div>
@@ -153,11 +158,11 @@ function Hero() {
       {/* Footer CTA */}
       <div className='bg-[#2276E3] text-white py-16'>
         <div className='max-w-4xl mx-auto px-4 text-center'>
-          <h2 className='text-3xl md:text-4xl font-bold mb-4'>Ready to Start Your Adventure?</h2>
-          <p className='text-xl text-blue-100 mb-8'>Join thousands of happy travelers who trust our AI planning</p>
+          <h2 className='text-3xl md:text-4xl font-bold mb-4'>{t('readyToStart')}</h2>
+          <p className='text-xl text-blue-100 mb-8'>{t('joinThousands')}</p>
           <Link to={'/create-trip'}>
             <Button className='bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-12 py-4 text-lg font-bold rounded-md shadow-xl hover:shadow-2xl transition-all duration-200 uppercase'>
-              Create My Trip
+              {t('createMyTrip')}
             </Button>
           </Link>
         </div>

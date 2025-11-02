@@ -6,3 +6,4 @@ sendgrid
 certifi
 requests
 jinja2
+gunicorn

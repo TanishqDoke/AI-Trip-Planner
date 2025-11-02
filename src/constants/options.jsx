@@ -89,6 +89,38 @@ export const SelectTravelList = [
     }
 ]
 
+// Dynamic travel group translations
+export const getTravelGroupTranslations = (t) => [
+    {
+        id: 1,
+        title: t('justMeTitle'),
+        desc: t('justMeDesc'),
+        icon: '✈️',
+        people: '1 person'
+    },
+    {
+        id: 2,
+        title: t('coupleTitle'),
+        desc: t('coupleDesc'),
+        icon: '🥂',
+        people: '2 people'
+    },
+    {
+        id: 3,
+        title: t('familyTitle'),
+        desc: t('familyDesc'),
+        icon: '🏡',
+        people: '3 to 5 People'
+    },
+    {
+        id: 4,
+        title: t('friendsTitle'),
+        desc: t('friendsDesc'),
+        icon: '⛵',
+        people: '5 to 10 people'
+    }
+]
+
 // Budget slider configuration
 export const BudgetSliderConfig = {
     min: 2000,
@@ -98,6 +130,58 @@ export const BudgetSliderConfig = {
     defaultMax: 80000,
     currency: '₹'
 }
+
+// Theme translations function
+export const getThemeTranslations = (t) => [
+    {
+        id: 1,
+        title: t('heritageTitle'),
+        desc: t('heritageDesc'),
+        icon: '🏛️',
+        value: 'heritage',
+        keywords: 'temples, monuments, museums, historical sites, cultural centers, heritage walks, traditional crafts, local art'
+    },
+    {
+        id: 2,
+        title: t('adventureTitle'),
+        desc: t('adventureDesc'),
+        icon: '🏔️',
+        value: 'adventure',
+        keywords: 'trekking, hiking, water sports, rock climbing, paragliding, camping, wildlife safari, adventure parks'
+    },
+    {
+        id: 3,
+        title: t('nightlifeTitle'),
+        desc: t('nightlifeDesc'),
+        icon: '🎭',
+        value: 'nightlife',
+        keywords: 'nightclubs, bars, live music, theaters, entertainment districts, rooftop lounges, night markets, cultural shows'
+    },
+    {
+        id: 4,
+        title: t('culinaryTitle'),
+        desc: t('culinaryDesc'),
+        icon: '🍜',
+        value: 'culinary',
+        keywords: 'local restaurants, street food, food tours, cooking classes, food markets, specialty cuisine, cafes, traditional dishes'
+    },
+    {
+        id: 5,
+        title: t('wellnessTitle'),
+        desc: t('wellnessDesc'),
+        icon: '🧘',
+        value: 'wellness',
+        keywords: 'spa, yoga centers, meditation retreats, wellness resorts, ayurveda, massage, peaceful gardens, nature walks'
+    },
+    {
+        id: 6,
+        title: t('beachTitle'),
+        desc: t('beachDesc'),
+        icon: '🏖️',
+        value: 'beach',
+        keywords: 'beaches, water sports, coastal walks, beach resorts, snorkeling, boat rides, seaside restaurants, sunset points'
+    }
+];
 
 export const TripThemes = [
     {
