@@ -745,196 +745,443 @@ function CreateTrip() {
     }
   }
 
+  // const SaveAiTrip = async (TripData) => {
+  //   try {
+  //     const user = JSON.parse(localStorage.getItem('user'))
+  //     const docId = Date.now().toString();
+      
+  //     console.log('Saving trip to Firebase...');
+  //     console.log('Raw AI Response:', TripData);
+      
+  //     // Parse and validate the JSON response
+  //     let parsedTripData;
+  //     try {
+  //       // Clean the response - remove any markdown formatting or extra text
+  //       let cleanedData = TripData;
+        
+  //       // Remove markdown code blocks if present
+  //       cleanedData = cleanedData.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        
+  //       // Find the JSON part if there's extra text
+  //       const jsonStart = cleanedData.indexOf('{');
+  //       const jsonEnd = cleanedData.lastIndexOf('}');
+        
+  //       if (jsonStart !== -1 && jsonEnd !== -1) {
+  //         cleanedData = cleanedData.substring(jsonStart, jsonEnd + 1);
+  //       }
+        
+  //       parsedTripData = JSON.parse(cleanedData);
+        
+  //       console.log('Initial parsed data:', parsedTripData);
+        
+  //       // Validate and transform the structure to match expected format
+  //       let finalItinerary = [];
+  //       let finalHotels = [];
+        
+  //       // Handle different itinerary formats
+  //       if (parsedTripData.itinerary) {
+  //         if (Array.isArray(parsedTripData.itinerary)) {
+  //           // Already in correct format
+  //           finalItinerary = parsedTripData.itinerary;
+  //         } else if (parsedTripData.itinerary.daily_plan && Array.isArray(parsedTripData.itinerary.daily_plan)) {
+  //           // Format: {itinerary: {daily_plan: [...]}}
+  //           finalItinerary = parsedTripData.itinerary.daily_plan;
+  //         } else if (typeof parsedTripData.itinerary === 'object') {
+  //           // Try to extract array from any nested structure
+  //           const potentialArrays = Object.values(parsedTripData.itinerary).filter(Array.isArray);
+  //           if (potentialArrays.length > 0) {
+  //             finalItinerary = potentialArrays[0];
+  //           }
+  //         }
+  //       }
+        
+  //       // Handle different hotel formats  
+  //       if (parsedTripData.recommended_hotels && Array.isArray(parsedTripData.recommended_hotels)) {
+  //         finalHotels = parsedTripData.recommended_hotels;
+  //       } else if (parsedTripData.hotels && Array.isArray(parsedTripData.hotels)) {
+  //         finalHotels = parsedTripData.hotels;
+  //       } else if (parsedTripData.hotel_options && Array.isArray(parsedTripData.hotel_options)) {
+  //         finalHotels = parsedTripData.hotel_options;
+  //       } else if (parsedTripData.recommended_hotel) {
+  //         // Handle single hotel object
+  //         finalHotels = [parsedTripData.recommended_hotel];
+  //       }
+        
+  //       // Create the final normalized structure
+  //       parsedTripData = {
+  //         ...parsedTripData,
+  //         itinerary: finalItinerary,
+  //         hotels: finalHotels,
+  //         recommended_hotels: finalHotels, // Add this for backward compatibility
+  //         recommended_hotel: finalHotels.length > 0 ? finalHotels[0] : null // Add this for backward compatibility
+  //       };
+        
+  //       console.log('Final normalized data:', parsedTripData);
+        
+  //     } catch (parseError) {
+  //       console.error('Failed to parse AI response:', parseError);
+  //       console.log('Problematic response:', TripData);
+        
+  //       // Create a fallback structure
+  //       parsedTripData = {
+  //         hotels: [],
+  //         itinerary: [],
+  //         rawResponse: TripData,
+  //         parseError: parseError.message
+  //       };
+        
+  //       toast('AI response received but may have formatting issues', {
+  //         description: 'Your trip has been saved, but some data might need manual review.',
+  //       });
+  //     }
+
+  //           const computeCostEstimates = async () => {
+  //       try {
+  //         const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
+  //         const days = parseInt(formData.noOfDays) || 1;
+
+  //         // Include selected travel cost in the prompt
+  //         const selectedTravelCost = formData?.selectedTravel?.totalCost || 0;
+  //         const prompt = `You are given a travel itinerary JSON and the user's selections. Using the itinerary and user selections, produce a realistic cost estimate in INR that is consistent with the user's budget range, number of days (${days}), number of travelers (${travelers}), and destination (${formData?.location?.label || formData.location || 'unknown'}). The user has already selected their travel mode (${formData?.selectedTravel?.mode || 'unknown'}) with a total cost of ₹${selectedTravelCost}. Respond ONLY in JSON with this shape:\n\n{\n  "market_price": {"min": <number>, "max": <number>, "currency": "INR"},\n  "ai_optimized_price": {"amount": <number>, "currency": "INR"},\n  "per_day_range": {"min": <number>, "max": <number>},\n  "per_person_total": {"amount": <number>},\n  "breakdown": {\n    "hotel": <number>,\n    "primary_transport": <number>,\n    "local_transport": <number>,\n    "food": <number>,\n    "activities": <number>\n  }\n}\n\nGuidelines:\n- IMPORTANT: The primary_transport cost MUST be exactly ${selectedTravelCost} to match the user's selected travel mode cost.\n- The local_transport cost should be estimated based on the itinerary locations, local taxi/bus/auto fares, and number of days.\n- For ${formData?.location?.label || 'the destination'}, estimate daily local transport costs considering:\n  * Distances between attractions in the itinerary\n  * Local transport options (taxi, auto, bus, etc.)\n  * Number of days (${days})\n  * Number of travelers (${travelers})\n- Ensure numbers are integers (no commas) and totals are internally consistent (breakdown sums approximately equal totals).\n- Base hotel/food/activities numbers on values found in the itinerary/hotels if available; otherwise infer sensible values for the destination and days.\n- Ensure the market price range aligns with the user's selected budget range (${formData?.budget?.min} - ${formData?.budget?.max}); do not produce totals wildly outside the budget.\n- AI optimized price should be a realistic total that includes both transport costs plus optimized costs for hotel, food, and activities.\n\nHere is the parsed tripData JSON:\n` + JSON.stringify(parsedTripData) + `\n\nHere is the user's selection JSON:\n` + JSON.stringify({ travelers, days, budget: formData?.budget, selectedTravel: formData?.selectedTravel }) + `\n`;
+
+  //         const result = await chatSession.sendMessage(prompt);
+  //         const text = result?.response?.text();
+  //         if (!text) throw new Error('No response from Gemini for cost estimates');
+
+  //         // Clean and parse the response
+  //         let cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  //         const start = cleaned.indexOf('{');
+  //         const end = cleaned.lastIndexOf('}');
+  //         if (start !== -1 && end !== -1) cleaned = cleaned.substring(start, end + 1);
+
+  //         const estimates = JSON.parse(cleaned);
+  //         return estimates;
+  //       } catch (err) {
+  //         console.warn('Gemini cost estimation failed, falling back to heuristic:', err);
+
+  //         // Fallback deterministic estimate based on budget / days / travelers
+  //         const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
+  //         const days = parseInt(formData.noOfDays) || 1;
+  //         const budgetMin = formData?.budget?.min || BudgetSliderConfig.defaultMin;
+  //         const budgetMax = formData?.budget?.max || BudgetSliderConfig.defaultMax;
+
+  //         const perPersonPerDayMin = Math.max(300, Math.floor(budgetMin / (travelers * days)));
+  //         const perPersonPerDayMax = Math.max(perPersonPerDayMin + 200, Math.ceil(budgetMax / (travelers * days)));
+
+  //         const market_min = Math.max(1000, budgetMin);
+  //         const market_max = Math.max(market_min + 500, budgetMax);
+  //         const marketAvg = Math.round((market_min + market_max) / 2);
+  //         const aiOpt = Math.round(marketAvg * 0.88); // ~12% savings
+
+  //         const breakdown = {
+  //           hotel: Math.round(marketAvg * 0.5),
+  //           transport: Math.round(marketAvg * 0.2),
+  //           food: Math.round(marketAvg * 0.2),
+  //           activities: Math.round(marketAvg * 0.1)
+  //         };
+
+  //         return {
+  //           market_price: { min: market_min, max: market_max, currency: 'INR' },
+  //           ai_optimized_price: { amount: aiOpt, currency: 'INR' },
+  //           per_day_range: { min: perPersonPerDayMin * travelers, max: perPersonPerDayMax * travelers },
+  //           per_person_total: { amount: Math.round((perPersonPerDayMin + perPersonPerDayMax) / 2 * days) },
+  //           breakdown
+  //         };
+  //       }
+  //     };
+
+  //     // compute estimates and merge into trip data
+  //     const estimates = await computeCostEstimates();
+  //     if (estimates) {
+  //       // attach estimates in a stable location
+  //       parsedTripData.cost_estimates = estimates;
+
+  //       // also ensure cost_breakdown.grand_total exists for backward compatibility
+  //       if (!parsedTripData.cost_breakdown) parsedTripData.cost_breakdown = {};
+  //       // prefer AI optimized amount as displayed total, fallback to market avg
+  //       const displayTotal = estimates.ai_optimized_price?.amount || Math.round(((estimates.market_price?.min || 0) + (estimates.market_price?.max || 0)) / 2);
+  //       parsedTripData.cost_breakdown.grand_total = `₹${displayTotal}`;
+  //     }
+
+  //     await setDoc(doc(db, "AITrips", docId), {
+  //       userSelection: {
+  //         ...formData,
+  //         // Convert budget object to string for display
+  //         budget: formData.budget ? `${BudgetSliderConfig.currency}${formData.budget.min?.toLocaleString()} - ${BudgetSliderConfig.currency}${formData.budget.max?.toLocaleString()}` : 'Not specified'
+  //       },
+  //       tripData: parsedTripData,
+  //       userEmail: user?.email,
+  //       id: docId,
+  //       createdAt: new Date().toISOString()
+  //     });
+
+  //     console.log('Trip saved successfully with ID:', docId);
+  //     setLoading(false);
+      
+  //     toast('🎉 Your trip has been created!', {
+  //       description: 'Redirecting to your personalized itinerary...',
+  //     });
+      
+  //     // Small delay to show the success message
+  //     setTimeout(() => {
+  //       navigate('/view-trip/' + docId);
+  //     }, 1000);
+      
+  //   } catch (error) {
+  //     console.error('Error saving trip:', error);
+  //     setLoading(false);
+  //     toast('Failed to save your trip', {
+  //       description: 'Please try again. If the problem persists, check your internet connection.',
+  //     });
+  //   }
+  // }
+
   const SaveAiTrip = async (TripData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'))
+    const docId = Date.now().toString();
+    
+    console.log('Saving trip to Firebase...');
+    console.log('Raw AI Response:', TripData);
+    
+    // Parse and validate the JSON response
+    let parsedTripData;
     try {
-      const user = JSON.parse(localStorage.getItem('user'))
-      const docId = Date.now().toString();
+      // Clean the response - remove any markdown formatting or extra text
+      let cleanedData = TripData;
       
-      console.log('Saving trip to Firebase...');
-      console.log('Raw AI Response:', TripData);
+      // Remove markdown code blocks if present
+      cleanedData = cleanedData.replace(/``````\n?/g, '');
       
-      // Parse and validate the JSON response
-      let parsedTripData;
-      try {
-        // Clean the response - remove any markdown formatting or extra text
-        let cleanedData = TripData;
-        
-        // Remove markdown code blocks if present
-        cleanedData = cleanedData.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-        
-        // Find the JSON part if there's extra text
-        const jsonStart = cleanedData.indexOf('{');
-        const jsonEnd = cleanedData.lastIndexOf('}');
-        
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          cleanedData = cleanedData.substring(jsonStart, jsonEnd + 1);
-        }
-        
-        parsedTripData = JSON.parse(cleanedData);
-        
-        console.log('Initial parsed data:', parsedTripData);
-        
-        // Validate and transform the structure to match expected format
-        let finalItinerary = [];
-        let finalHotels = [];
-        
-        // Handle different itinerary formats
-        if (parsedTripData.itinerary) {
-          if (Array.isArray(parsedTripData.itinerary)) {
-            // Already in correct format
-            finalItinerary = parsedTripData.itinerary;
-          } else if (parsedTripData.itinerary.daily_plan && Array.isArray(parsedTripData.itinerary.daily_plan)) {
-            // Format: {itinerary: {daily_plan: [...]}}
-            finalItinerary = parsedTripData.itinerary.daily_plan;
-          } else if (typeof parsedTripData.itinerary === 'object') {
-            // Try to extract array from any nested structure
-            const potentialArrays = Object.values(parsedTripData.itinerary).filter(Array.isArray);
-            if (potentialArrays.length > 0) {
-              finalItinerary = potentialArrays[0];
-            }
+      // Find the JSON part if there's extra text
+      const jsonStart = cleanedData.indexOf('{');
+      const jsonEnd = cleanedData.lastIndexOf('}');
+      
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        cleanedData = cleanedData.substring(jsonStart, jsonEnd + 1);
+      }
+      
+      parsedTripData = JSON.parse(cleanedData);
+      
+      console.log('Initial parsed data:', parsedTripData);
+      
+      // Validate and transform the structure to match expected format
+      let finalItinerary = [];
+      let finalHotels = [];
+      
+      // Handle different itinerary formats
+      if (parsedTripData.itinerary) {
+        if (Array.isArray(parsedTripData.itinerary)) {
+          // Already in correct format
+          finalItinerary = parsedTripData.itinerary;
+        } else if (parsedTripData.itinerary.daily_plan && Array.isArray(parsedTripData.itinerary.daily_plan)) {
+          // Format: {itinerary: {daily_plan: [...]}}
+          finalItinerary = parsedTripData.itinerary.daily_plan;
+        } else if (typeof parsedTripData.itinerary === 'object') {
+          // Try to extract array from any nested structure
+          const potentialArrays = Object.values(parsedTripData.itinerary).filter(Array.isArray);
+          if (potentialArrays.length > 0) {
+            finalItinerary = potentialArrays[0];
           }
         }
-        
-        // Handle different hotel formats  
-        if (parsedTripData.recommended_hotels && Array.isArray(parsedTripData.recommended_hotels)) {
-          finalHotels = parsedTripData.recommended_hotels;
-        } else if (parsedTripData.hotels && Array.isArray(parsedTripData.hotels)) {
-          finalHotels = parsedTripData.hotels;
-        } else if (parsedTripData.hotel_options && Array.isArray(parsedTripData.hotel_options)) {
-          finalHotels = parsedTripData.hotel_options;
-        } else if (parsedTripData.recommended_hotel) {
-          // Handle single hotel object
-          finalHotels = [parsedTripData.recommended_hotel];
-        }
-        
-        // Create the final normalized structure
-        parsedTripData = {
-          ...parsedTripData,
-          itinerary: finalItinerary,
-          hotels: finalHotels,
-          recommended_hotels: finalHotels, // Add this for backward compatibility
-          recommended_hotel: finalHotels.length > 0 ? finalHotels[0] : null // Add this for backward compatibility
-        };
-        
-        console.log('Final normalized data:', parsedTripData);
-        
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', parseError);
-        console.log('Problematic response:', TripData);
-        
-        // Create a fallback structure
-        parsedTripData = {
-          hotels: [],
-          itinerary: [],
-          rawResponse: TripData,
-          parseError: parseError.message
-        };
-        
-        toast('AI response received but may have formatting issues', {
-          description: 'Your trip has been saved, but some data might need manual review.',
-        });
       }
-
-            const computeCostEstimates = async () => {
-        try {
-          const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
-          const days = parseInt(formData.noOfDays) || 1;
-
-          // Include selected travel cost in the prompt
-          const selectedTravelCost = formData?.selectedTravel?.totalCost || 0;
-          const prompt = `You are given a travel itinerary JSON and the user's selections. Using the itinerary and user selections, produce a realistic cost estimate in INR that is consistent with the user's budget range, number of days (${days}), number of travelers (${travelers}), and destination (${formData?.location?.label || formData.location || 'unknown'}). The user has already selected their travel mode (${formData?.selectedTravel?.mode || 'unknown'}) with a total cost of ₹${selectedTravelCost}. Respond ONLY in JSON with this shape:\n\n{\n  "market_price": {"min": <number>, "max": <number>, "currency": "INR"},\n  "ai_optimized_price": {"amount": <number>, "currency": "INR"},\n  "per_day_range": {"min": <number>, "max": <number>},\n  "per_person_total": {"amount": <number>},\n  "breakdown": {\n    "hotel": <number>,\n    "primary_transport": <number>,\n    "local_transport": <number>,\n    "food": <number>,\n    "activities": <number>\n  }\n}\n\nGuidelines:\n- IMPORTANT: The primary_transport cost MUST be exactly ${selectedTravelCost} to match the user's selected travel mode cost.\n- The local_transport cost should be estimated based on the itinerary locations, local taxi/bus/auto fares, and number of days.\n- For ${formData?.location?.label || 'the destination'}, estimate daily local transport costs considering:\n  * Distances between attractions in the itinerary\n  * Local transport options (taxi, auto, bus, etc.)\n  * Number of days (${days})\n  * Number of travelers (${travelers})\n- Ensure numbers are integers (no commas) and totals are internally consistent (breakdown sums approximately equal totals).\n- Base hotel/food/activities numbers on values found in the itinerary/hotels if available; otherwise infer sensible values for the destination and days.\n- Ensure the market price range aligns with the user's selected budget range (${formData?.budget?.min} - ${formData?.budget?.max}); do not produce totals wildly outside the budget.\n- AI optimized price should be a realistic total that includes both transport costs plus optimized costs for hotel, food, and activities.\n\nHere is the parsed tripData JSON:\n` + JSON.stringify(parsedTripData) + `\n\nHere is the user's selection JSON:\n` + JSON.stringify({ travelers, days, budget: formData?.budget, selectedTravel: formData?.selectedTravel }) + `\n`;
-
-          const result = await chatSession.sendMessage(prompt);
-          const text = result?.response?.text();
-          if (!text) throw new Error('No response from Gemini for cost estimates');
-
-          // Clean and parse the response
-          let cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-          const start = cleaned.indexOf('{');
-          const end = cleaned.lastIndexOf('}');
-          if (start !== -1 && end !== -1) cleaned = cleaned.substring(start, end + 1);
-
-          const estimates = JSON.parse(cleaned);
-          return estimates;
-        } catch (err) {
-          console.warn('Gemini cost estimation failed, falling back to heuristic:', err);
-
-          // Fallback deterministic estimate based on budget / days / travelers
-          const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
-          const days = parseInt(formData.noOfDays) || 1;
-          const budgetMin = formData?.budget?.min || BudgetSliderConfig.defaultMin;
-          const budgetMax = formData?.budget?.max || BudgetSliderConfig.defaultMax;
-
-          const perPersonPerDayMin = Math.max(300, Math.floor(budgetMin / (travelers * days)));
-          const perPersonPerDayMax = Math.max(perPersonPerDayMin + 200, Math.ceil(budgetMax / (travelers * days)));
-
-          const market_min = Math.max(1000, budgetMin);
-          const market_max = Math.max(market_min + 500, budgetMax);
-          const marketAvg = Math.round((market_min + market_max) / 2);
-          const aiOpt = Math.round(marketAvg * 0.88); // ~12% savings
-
-          const breakdown = {
-            hotel: Math.round(marketAvg * 0.5),
-            transport: Math.round(marketAvg * 0.2),
-            food: Math.round(marketAvg * 0.2),
-            activities: Math.round(marketAvg * 0.1)
-          };
-
-          return {
-            market_price: { min: market_min, max: market_max, currency: 'INR' },
-            ai_optimized_price: { amount: aiOpt, currency: 'INR' },
-            per_day_range: { min: perPersonPerDayMin * travelers, max: perPersonPerDayMax * travelers },
-            per_person_total: { amount: Math.round((perPersonPerDayMin + perPersonPerDayMax) / 2 * days) },
-            breakdown
-          };
-        }
+      
+      // Handle different hotel formats  
+      if (parsedTripData.recommended_hotels && Array.isArray(parsedTripData.recommended_hotels)) {
+        finalHotels = parsedTripData.recommended_hotels;
+      } else if (parsedTripData.hotels && Array.isArray(parsedTripData.hotels)) {
+        finalHotels = parsedTripData.hotels;
+      } else if (parsedTripData.hotel_options && Array.isArray(parsedTripData.hotel_options)) {
+        finalHotels = parsedTripData.hotel_options;
+      } else if (parsedTripData.recommended_hotel) {
+        // Handle single hotel object
+        finalHotels = [parsedTripData.recommended_hotel];
+      }
+      
+      // Create the final normalized structure
+      parsedTripData = {
+        ...parsedTripData,
+        itinerary: finalItinerary,
+        hotels: finalHotels,
+        recommended_hotels: finalHotels, // Add this for backward compatibility
+        recommended_hotel: finalHotels.length > 0 ? finalHotels[0] : null // Add this for backward compatibility
       };
-
-      // compute estimates and merge into trip data
-      const estimates = await computeCostEstimates();
-      if (estimates) {
-        // attach estimates in a stable location
-        parsedTripData.cost_estimates = estimates;
-
-        // also ensure cost_breakdown.grand_total exists for backward compatibility
-        if (!parsedTripData.cost_breakdown) parsedTripData.cost_breakdown = {};
-        // prefer AI optimized amount as displayed total, fallback to market avg
-        const displayTotal = estimates.ai_optimized_price?.amount || Math.round(((estimates.market_price?.min || 0) + (estimates.market_price?.max || 0)) / 2);
-        parsedTripData.cost_breakdown.grand_total = `₹${displayTotal}`;
-      }
-
-      await setDoc(doc(db, "AITrips", docId), {
-        userSelection: {
-          ...formData,
-          // Convert budget object to string for display
-          budget: formData.budget ? `${BudgetSliderConfig.currency}${formData.budget.min?.toLocaleString()} - ${BudgetSliderConfig.currency}${formData.budget.max?.toLocaleString()}` : 'Not specified'
-        },
-        tripData: parsedTripData,
-        userEmail: user?.email,
-        id: docId,
-        createdAt: new Date().toISOString()
-      });
-
-      console.log('Trip saved successfully with ID:', docId);
-      setLoading(false);
       
-      toast('🎉 Your trip has been created!', {
-        description: 'Redirecting to your personalized itinerary...',
-      });
+      console.log('Final normalized data:', parsedTripData);
       
-      // Small delay to show the success message
-      setTimeout(() => {
-        navigate('/view-trip/' + docId);
-      }, 1000);
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError);
+      console.log('Problematic response:', TripData);
       
-    } catch (error) {
-      console.error('Error saving trip:', error);
-      setLoading(false);
-      toast('Failed to save your trip', {
-        description: 'Please try again. If the problem persists, check your internet connection.',
+      // Create a fallback structure
+      parsedTripData = {
+        hotels: [],
+        itinerary: [],
+        rawResponse: TripData,
+        parseError: parseError.message
+      };
+      
+      toast('AI response received but may have formatting issues', {
+        description: 'Your trip has been saved, but some data might need manual review.',
       });
     }
+
+    const computeCostEstimates = async () => {
+      try {
+        const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
+        const days = parseInt(formData.noOfDays) || 1;
+
+        // Include selected travel cost in the prompt
+        const selectedTravelCost = formData?.selectedTravel?.totalCost || 0;
+        const prompt = `You are given a travel itinerary JSON and the user's selections. Using the itinerary and user selections, produce a realistic cost estimate in INR that is consistent with the user's budget range, number of days (${days}), number of travelers (${travelers}), and destination (${formData?.location?.label || formData.location || 'unknown'}). The user has already selected their travel mode (${formData?.selectedTravel?.mode || 'unknown'}) with a total cost of ₹${selectedTravelCost}. Respond ONLY in JSON with this shape:\n\n{\n  "market_price": {"min": <number>, "max": <number>, "currency": "INR"},\n  "ai_optimized_price": {"amount": <number>, "currency": "INR"},\n  "per_day_range": {"min": <number>, "max": <number>},\n  "per_person_total": {"amount": <number>},\n  "breakdown": {\n    "hotel": <number>,\n    "primary_transport": <number>,\n    "local_transport": <number>,\n    "food": <number>,\n    "activities": <number>\n  }\n}\n\nGuidelines:\n- IMPORTANT: The primary_transport cost MUST be exactly ${selectedTravelCost} to match the user's selected travel mode cost.\n- The local_transport cost should be estimated based on the itinerary locations, local taxi/bus/auto fares, and number of days.\n- For ${formData?.location?.label || 'the destination'}, estimate daily local transport costs considering:\n  * Distances between attractions in the itinerary\n  * Local transport options (taxi, auto, bus, etc.)\n  * Number of days (${days})\n  * Number of travelers (${travelers})\n- Ensure numbers are integers (no commas) and totals are internally consistent (breakdown sums approximately equal totals).\n- Base hotel/food/activities numbers on values found in the itinerary/hotels if available; otherwise infer sensible values for the destination and days.\n- Ensure the market price range aligns with the user's selected budget range (${formData?.budget?.min} - ${formData?.budget?.max}); do not produce totals wildly outside the budget.\n- AI optimized price should be a realistic total that includes both transport costs plus optimized costs for hotel, food, and activities.\n\nHere is the parsed tripData JSON:\n` + JSON.stringify(parsedTripData) + `\n\nHere is the user's selection JSON:\n` + JSON.stringify({ travelers, days, budget: formData?.budget, selectedTravel: formData?.selectedTravel }) + `\n`;
+
+        const result = await chatSession.sendMessage(prompt);
+        const text = result?.response?.text();
+        if (!text) throw new Error('No response from Gemini for cost estimates');
+
+        // Clean and parse the response
+        let cleaned = text.replace(/``````\n?/g, '').trim();
+        const start = cleaned.indexOf('{');
+        const end = cleaned.lastIndexOf('}');
+        if (start !== -1 && end !== -1) cleaned = cleaned.substring(start, end + 1);
+
+        const estimates = JSON.parse(cleaned);
+        return estimates;
+      } catch (err) {
+        console.warn('Gemini cost estimation failed, falling back to heuristic:', err);
+
+        // Fallback deterministic estimate based on budget / days / travelers
+        const travelers = parseInt(formData.numberOfPeople) || (formData.traveler === 'A Couple' ? 2 : (formData.traveler === 'Just Me' ? 1 : 1));
+        const days = parseInt(formData.noOfDays) || 1;
+        const budgetMin = formData?.budget?.min || BudgetSliderConfig.defaultMin;
+        const budgetMax = formData?.budget?.max || BudgetSliderConfig.defaultMax;
+
+        const perPersonPerDayMin = Math.max(300, Math.floor(budgetMin / (travelers * days)));
+        const perPersonPerDayMax = Math.max(perPersonPerDayMin + 200, Math.ceil(budgetMax / (travelers * days)));
+
+        const market_min = Math.max(1000, budgetMin);
+        const market_max = Math.max(market_min + 500, budgetMax);
+        const marketAvg = Math.round((market_min + market_max) / 2);
+        const aiOpt = Math.round(marketAvg * 0.88); // ~12% savings
+
+        const breakdown = {
+          hotel: Math.round(marketAvg * 0.5),
+          transport: Math.round(marketAvg * 0.2),
+          food: Math.round(marketAvg * 0.2),
+          activities: Math.round(marketAvg * 0.1)
+        };
+
+        return {
+          market_price: { min: market_min, max: market_max, currency: 'INR' },
+          ai_optimized_price: { amount: aiOpt, currency: 'INR' },
+          per_day_range: { min: perPersonPerDayMin * travelers, max: perPersonPerDayMax * travelers },
+          per_person_total: { amount: Math.round((perPersonPerDayMin + perPersonPerDayMax) / 2 * days) },
+          breakdown
+        };
+      }
+    };
+
+    // compute estimates and merge into trip data
+    const estimates = await computeCostEstimates();
+    if (estimates) {
+      // attach estimates in a stable location
+      parsedTripData.cost_estimates = estimates;
+
+      // also ensure cost_breakdown.grand_total exists for backward compatibility
+      if (!parsedTripData.cost_breakdown) parsedTripData.cost_breakdown = {};
+      // prefer AI optimized amount as displayed total, fallback to market avg
+      const displayTotal = estimates.ai_optimized_price?.amount || Math.round(((estimates.market_price?.min || 0) + (estimates.market_price?.max || 0)) / 2);
+      parsedTripData.cost_breakdown.grand_total = `₹${displayTotal}`;
+    }
+
+    await setDoc(doc(db, "AITrips", docId), {
+      userSelection: {
+        ...formData,
+        // Convert budget object to string for display
+        budget: formData.budget ? `${BudgetSliderConfig.currency}${formData.budget.min?.toLocaleString()} - ${BudgetSliderConfig.currency}${formData.budget.max?.toLocaleString()}` : 'Not specified'
+      },
+      tripData: parsedTripData,
+      userEmail: user?.email,
+      id: docId,
+      createdAt: new Date().toISOString()
+    });
+
+    console.log('Trip saved successfully with ID:', docId);
+    
+    // 🆕 NEW: Send email notification to user
+    try {
+      console.log('🔄 Sending itinerary email to backend...');
+      
+      // Format dates properly
+      const startDate = formData?.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : null;
+      const endDate = formData?.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : null;
+      
+      // Get cost estimates
+      const budgetAmount = estimates?.ai_optimized_price?.amount || 
+                          estimates?.market_price?.max || 
+                          formData?.budget?.max;
+      
+      const emailPayload = {
+        userEmail: user?.email,
+        userName: user?.name || user?.given_name || 'Traveler',
+        destination: formData?.location?.label || 'Your Destination',
+        startDate: startDate,  // Properly formatted date
+        endDate: endDate,      // Properly formatted date
+        noOfDays: formData?.noOfDays,
+        budget: budgetAmount,  // AI optimized price, NOT market price
+        costEstimates: estimates,  // Send full estimates object
+        hotels: parsedTripData?.hotels || [],
+        itinerary: parsedTripData?.itinerary || [],
+        aiItineraryRaw: TripData,  // Full raw itinerary
+        tripId: docId
+      };
+      
+      console.log('📧 Email Payload:', emailPayload);
+      
+      const emailResponse = await fetch('http://localhost:5000/api/send-itinerary-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailPayload)
+      });
+      
+      const emailResult = await emailResponse.json();
+      
+      if (emailResponse.ok) {
+        console.log('✅ Email sent successfully!');
+        toast.success('📧 Confirmation email sent to ' + user?.email);
+      } else {
+        console.warn('⚠️ Email API returned error:', emailResult);
+        toast.warning('Email sending encountered an issue');
+      }
+      
+    } catch (emailError) {
+      console.error('❌ Email sending failed with error:', emailError);
+      toast.error('Email notification failed');
+    }
+    // 🆕 END OF NEW CODE
+    
+    setLoading(false);
+    
+    toast('🎉 Your trip has been created!', {
+      description: 'Redirecting to your personalized itinerary...',
+    });
+    
+    // Small delay to show the success message
+    setTimeout(() => {
+      navigate('/view-trip/' + docId);
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error saving trip:', error);
+    setLoading(false);
+    toast('Failed to save your trip', {
+      description: 'Please try again. If the problem persists, check your internet connection.',
+    });
   }
+}
+
 
   const login = useGoogleLogin({
     onSuccess: (res) => GetUserProfile(res),

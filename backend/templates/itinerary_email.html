@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Trip Itinerary is Ready</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        
+        .email-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .greeting strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .intro-text {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        
+        .trip-overview {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .trip-overview h2 {
+            color: #667eea;
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .overview-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .overview-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+        
+        .overview-value {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .overview-value.price {
+            color: #28a745;
+            font-size: 22px;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .flights-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .flight-card {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0e8ff 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .airline-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .flight-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #28a745;
+        }
+        
+        .flight-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .flight-detail-item {
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .flight-detail-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .hotel-card {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8e8 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #764ba2;
+            margin-bottom: 15px;
+        }
+        
+        .hotel-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        
+        .hotel-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .hotel-info-item {
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .hotel-rating {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        
+        .hotel-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #28a745;
+        }
+        
+        .itinerary-section {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 30px;
+        }
+        
+        .itinerary-text {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .divider {
+            border: none;
+            border-top: 2px solid #e0e0e0;
+            margin: 30px 0;
+        }
+        
+        .footer {
+            background-color: #f5f5f5;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        
+        .footer-disclaimer {
+            font-size: 11px;
+            color: #999;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        .highlight {
+            background-color: #fff9e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 25px 15px;
+            }
+            
+            .header {
+                padding: 30px 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flight-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .hotel-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>🎉 Your Trip Itinerary is Ready!</h1>
+            <p>Your personalized travel plan has been created just for you</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Greeting -->
+            <div class="greeting">
+                Hello <strong>{{ user_name }}</strong>,
+            </div>
+            
+            <!-- Intro Text -->
+            <p class="intro-text">
+                Great news! Your customized travel itinerary for <span class="highlight">{{ destination }}</span> has been successfully generated by CerebroCraft. 
+                We've carefully planned every detail to ensure you have an amazing and memorable trip. 
+                Below, you'll find all the important details including flights, accommodations, and your complete day-by-day itinerary.
+            </p>
+            
+            <!-- Trip Overview Section -->
+            <div class="trip-overview">
+                <h2>📋 Trip Overview</h2>
+                <div class="overview-grid">
+                    <div class="overview-item">
+                        <div class="overview-label">📍 Destination</div>
+                        <div class="overview-value">{{ destination }}</div>
+                    </div>
+                    {% if dates_string %}
+                    <div class="overview-item">
+                        <div class="overview-label">📋 Travel Dates</div>
+                        <div class="overview-value">{{ dates_string }}</div>
+                    </div>
+                    {% endif %}
+                    {% if duration %}
+                    <div class="overview-item">
+                        <div class="overview-label">⏱️ Duration</div>
+                        <div class="overview-value">{{ duration }} days</div>
+                    </div>
+                    {% endif %}
+                    {% if budget %}
+                    <div class="overview-item">
+                        <div class="overview-label">💰 Estimated Budget</div>
+                        <div class="overview-value price">₹{{ budget }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Flights Section -->
+            {% if flights %}
+            <div class="section">
+                <h3>✈️ Recommended Flights</h3>
+                <div class="flights-container">
+                    {% for flight in flights %}
+                    <div class="flight-card">
+                        <div class="flight-header">
+                            <div class="airline-name">
+                                {% if flight.operator %}{{ flight.operator }}{% else %}Flight Option{{ loop.index }}{% endif %}
+                                {% if flight.number %} - {{ flight.number }}{% endif %}
+                            </div>
+                            {% if flight.price and flight.price.amount %}
+                            <div class="flight-price">₹{{ flight.price.amount }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flight-details">
+                            <div class="flight-detail-item">
+                                <div class="flight-detail-label">🚀 Departure</div>
+                                {% if flight.departure %}
+                                    {% if flight.departure.location %}{{ flight.departure.location }}{% endif %}
+                                    {% if flight.departure.time %} at {{ flight.departure.time }}{% endif %}
+                                {% else %}
+                                    Departure details available
+                                {% endif %}
+                            </div>
+                            <div class="flight-detail-item">
+                                <div class="flight-detail-label">🛬 Arrival</div>
+                                {% if flight.arrival %}
+                                    {% if flight.arrival.location %}{{ flight.arrival.location }}{% endif %}
+                                    {% if flight.arrival.time %} at {{ flight.arrival.time }}{% endif %}
+                                {% else %}
+                                    Arrival details available
+                                {% endif %}
+                            </div>
+                            <div class="flight-detail-item">
+                                <div class="flight-detail-label">⏳ Duration</div>
+                                {{ flight.duration if flight.duration else 'Details available' }}
+                            </div>
+                            <div class="flight-detail-item">
+                                <div class="flight-detail-label">🎫 Class</div>
+                                {{ flight.class if flight.class else 'Economy' }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Hotels Section -->
+            {% if hotels %}
+            <div class="section">
+                <h3>🏨 Recommended Hotels</h3>
+                {% for hotel in hotels %}
+                <div class="hotel-card">
+                    <div class="hotel-name">
+                        {% if hotel.name %}{{ hotel.name }}{% else %}Hotel Option {{ loop.index }}{% endif %}
+                    </div>
+                    
+                    <div class="hotel-info">
+                        <div class="hotel-info-item">
+                            <div class="flight-detail-label">⭐ Rating</div>
+                            {% if hotel.rating %}
+                            <div class="hotel-rating">{{ hotel.rating }}/5 ⭐</div>
+                            {% else %}
+                            <div>Excellent choice</div>
+                            {% endif %}
+                        </div>
+                        <div class="hotel-info-item">
+                            <div class="flight-detail-label">📍 Location</div>
+                            {% if hotel.location %}{{ hotel.location }}{% else %}Premium location{% endif %}
+                        </div>
+                        <div class="hotel-info-item">
+                            <div class="flight-detail-label">📋 Check-in</div>
+                            {{ hotel.checkIn if hotel.checkIn else 'Per itinerary' }}
+                        </div>
+                        <div class="hotel-info-item">
+                            <div class="flight-detail-label">📋 Check-out</div>
+                            {{ hotel.checkOut if hotel.checkOut else 'Per itinerary' }}
+                        </div>
+                    </div>
+                    
+                    {% if hotel.price %}
+                    <div class="hotel-price">
+                        💰 {{ hotel.price }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Itinerary Section - COMPLETE WITH ALL ACTIVITIES -->
+            {% if itinerary_text %}
+            <div class="section">
+                <h3>📋 Complete Day-by-Day Itinerary</h3>
+                <div class="itinerary-section">
+                    <div class="itinerary-text">{{ itinerary_text }}</div>
+                </div>
+            </div>
+            {% endif %}
+  
+            <!-- Additional Info -->
+            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <h4 style="color: #667eea; margin-bottom: 10px;">💡 Quick Tips for Your Trip</h4>
+                <ul style="list-style-position: inside; color: #555; font-size: 14px; line-height: 1.8;">
+                    <li>Double-check your passport validity before your travel date</li>
+                    <li>Book your flights and hotels early for better rates</li>
+                    <li>Save local emergency contact numbers to your phone</li>
+                    <li>Inform your bank about international travel</li>
+                    <li>Pack according to the destination weather forecast</li>
+                    <li>Join our travel community for tips and recommendations</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Footer Section -->
+        <div class="footer">
+            <div class="footer-text">
+                <strong>Thank you for choosing CerebroCraft!</strong><br>
+                We're here to help you plan your perfect journey.
+            </div>
+            
+            <div class="footer-text">
+                Safe travels and enjoy every moment of your trip! 🌍✈️🗺️
+            </div>
+            
+            <div class="footer-disclaimer">
+                This email was automatically generated for your trip itinerary. 
+                Please do not reply to this email. For support, visit our website or contact our team.
+            </div>
+            
+            <div class="footer-text" style="margin-top: 20px; font-size: 12px; color: #999;">
+                © 2025 CerebroCraft. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
