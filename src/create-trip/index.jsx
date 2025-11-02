@@ -1234,6 +1234,97 @@ function CreateTrip() {
 
   return (
     <div className='relative min-h-screen bg-white'>
+      {/* Engaging Loading Animation Overlay */}
+      {loading && (
+        <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center'>
+          <div className='bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl'>
+            {/* Animated Plane Icon */}
+            <div className='flex justify-center mb-6'>
+              <div className='relative'>
+                <div className='w-20 h-20 bg-gradient-to-br from-[#2276E3] to-[#1565C0] rounded-full flex items-center justify-center animate-bounce'>
+                  <svg className='w-10 h-10 text-white animate-pulse' fill='currentColor' viewBox='0 0 20 20'>
+                    <path d='M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z' />
+                  </svg>
+                </div>
+                {/* Orbiting dots */}
+                <div className='absolute -top-2 -right-2 w-4 h-4 bg-[#D32F2F] rounded-full animate-ping'></div>
+                <div className='absolute -bottom-2 -left-2 w-3 h-3 bg-green-500 rounded-full animate-ping' style={{animationDelay: '0.5s'}}></div>
+              </div>
+            </div>
+
+            {/* Loading Text */}
+            <div className='text-center mb-6'>
+              <h3 className='text-2xl font-bold text-gray-900 mb-2'>
+                Creating Your Dream Trip ✨
+              </h3>
+              <p className='text-gray-600'>
+                Our AI is working its magic...
+              </p>
+            </div>
+
+            {/* Progress Steps */}
+            <div className='space-y-3 mb-6'>
+              {[
+                { icon: '🗺️', text: 'Analyzing your destination', delay: 0 },
+                { icon: '🏨', text: 'Finding perfect accommodations', delay: 0.5 },
+                { icon: '🎯', text: 'Curating activities & experiences', delay: 1 },
+                { icon: '💰', text: 'Optimizing your budget', delay: 1.5 }
+              ].map((step, index) => (
+                <div 
+                  key={index}
+                  className='flex items-center gap-3 p-3 bg-blue-50 rounded-lg transform transition-all duration-500'
+                  style={{
+                    animation: `slideIn 0.5s ease-out ${step.delay}s both`
+                  }}
+                >
+                  <span className='text-2xl'>{step.icon}</span>
+                  <span className='text-sm text-gray-700 font-medium'>{step.text}</span>
+                  <div className='ml-auto'>
+                    <div className='w-5 h-5 border-2 border-[#2276E3] border-t-transparent rounded-full animate-spin'></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Animated Progress Bar */}
+            <div className='relative h-2 bg-gray-200 rounded-full overflow-hidden'>
+              <div className='absolute inset-0 bg-gradient-to-r from-[#2276E3] to-[#D32F2F] rounded-full animate-progress'></div>
+            </div>
+
+            <p className='text-center text-xs text-gray-500 mt-4'>
+              This usually takes 10-30 seconds
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Add keyframe animations */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes progress {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        
+        .animate-progress {
+          animation: progress 2s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* EaseMyTrip Style Header Banner */}
       <div className='bg-gradient-to-r from-[#2276E3] to-[#1565C0] text-white py-12'>
         <div className='max-w-6xl mx-auto px-4'>
