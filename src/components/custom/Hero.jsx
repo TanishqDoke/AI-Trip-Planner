@@ -50,7 +50,7 @@ function Hero() {
               <div className='text-sm text-blue-100'>{t('destinations')}</div>
             </div>
             <div className='text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20'>
-              <div className='text-3xl font-bold mb-1'>2.5s</div>
+              <div className='text-3xl font-bold mb-1'>30s</div>
               <div className='text-sm text-blue-100'>{t('avgResponseTime')}</div>
             </div>
             <div className='text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20'>
