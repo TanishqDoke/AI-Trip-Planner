@@ -12,11 +12,15 @@ import HotelRecommendation from '../components/HotelRecommendation';
 import ComprehensiveItinerary from '../components/ComprehensiveItinerary';
 import BudgetBreakdown from '../components/BudgetBreakdown';
 import SelectedTravel from '../components/SelectedTravel';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslation } from '@/translations/translations';
 
 function Viewtrip() {
     const { tripId } = useParams();
     const navigate = useNavigate();
     const [trip, setTrip] = useState(null);
+    const { language } = useLanguage();
+    const t = (key) => getTranslation(language, key);
 
     useEffect(() => {
         tripId && GetTripData()
@@ -31,7 +35,7 @@ function Viewtrip() {
             setTrip(docSnap.data());
         }
         else {
-            toast("No trip found")
+            toast(t('noTripFound'))
         }
     }
 
@@ -50,13 +54,13 @@ function Viewtrip() {
                             <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
                             </svg>
-                            <span className='font-semibold'>Back to My Trips</span>
+                            <span className='font-semibold'>{t('backToMyTrips')}</span>
                         </button>
                     </div>
 
                     <div className='text-center'>
-                        <h1 className='text-3xl font-bold mb-2'>Your Trip Itinerary</h1>
-                        <p className='text-blue-100 text-lg'>Everything you need for your perfect journey</p>
+                        <h1 className='text-3xl font-bold mb-2'>{t('yourTripItinerary')}</h1>
+                        <p className='text-blue-100 text-lg'>{t('everythingYouNeed')}</p>
                     </div>
                 </div>
             </div>
@@ -83,8 +87,8 @@ function Viewtrip() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className='text-xl font-bold text-gray-900'>Share Your Trip</h2>
-                                    <p className='text-sm text-gray-600'>Share this amazing itinerary with friends and family</p>
+                                    <h2 className='text-xl font-bold text-gray-900'>{t('shareYourTrip')}</h2>
+                                    <p className='text-sm text-gray-600'>{t('shareItinerary')}</p>
                                 </div>
                             </div>
                             <ShareItinerary

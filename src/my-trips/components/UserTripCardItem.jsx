@@ -2,10 +2,14 @@ import { GetDetailedPlaceInfo, buildPhotoUrl } from '@/service/GlobalApi';
 import { placesCache } from '@/service/PlacesCache';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslation } from '@/translations/translations';
 
 function UserTripCardItem({ trip }) {
   const [photoUrl, setPhotoUrl] = useState('/placeholder.jpg');
   const [isLoading, setIsLoading] = useState(true);
+  const { language } = useLanguage();
+  const t = (key) => getTranslation(language, key);
 
   useEffect(() => {
     trip && GetPlacePhoto();
@@ -90,7 +94,7 @@ function UserTripCardItem({ trip }) {
           
           {/* Status Badge - EaseMyTrip Style */}
           <div className='absolute top-3 right-3 bg-[#D32F2F] text-white px-3 py-1 rounded-full text-xs font-bold uppercase'>
-            Planned
+            {t('planned')}
           </div>
         </div>
 
@@ -102,7 +106,7 @@ function UserTripCardItem({ trip }) {
             </h3>
             {trip?.createdAt && (
               <p className='text-sm text-slate-500'>
-                Created {formatDate(trip.createdAt)}
+                {t('created')} {formatDate(trip.createdAt)}
               </p>
             )}
           </div>
@@ -113,13 +117,13 @@ function UserTripCardItem({ trip }) {
               <svg className='w-4 h-4 text-[#2276E3]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
               </svg>
-              <span className='text-gray-600 font-medium'>{trip?.userSelection?.noOfDays} Days Trip</span>
+              <span className='text-gray-600 font-medium'>{trip?.userSelection?.noOfDays} {t('daysTrip')}</span>
             </div>
             <div className='flex items-center gap-2 text-sm bg-gray-50 p-2 rounded-md'>
               <svg className='w-4 h-4 text-[#D32F2F]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
               </svg>
-              <span className='text-gray-600 font-medium capitalize'>{trip?.userSelection?.budget} Budget</span>
+              <span className='text-gray-600 font-medium capitalize'>{trip?.userSelection?.budget} {t('budget')}</span>
             </div>
             <div className='flex items-center gap-2 text-sm bg-gray-50 p-2 rounded-md'>
               <svg className='w-4 h-4 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -132,7 +136,7 @@ function UserTripCardItem({ trip }) {
           {/* Action - EaseMyTrip Style */}
           <div className='pt-4 border-t-2 border-gray-100'>
             <button className='w-full bg-[#2276E3] hover:bg-[#1b5cba] text-white py-2 rounded-md font-bold transition-colors uppercase text-sm'>
-              View Itinerary →
+              {t('viewItinerary')}
             </button>
           </div>
         </div>

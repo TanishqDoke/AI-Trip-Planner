@@ -457,7 +457,7 @@
 // index.jsx
 
 import { Input } from '@/components/ui/input';
-import { AI_PROMPT, BudgetSliderConfig, SelectTravelList, TripThemes } from '@/constants/options';
+import { AI_PROMPT, BudgetSliderConfig, SelectTravelList, TripThemes, getThemeTranslations, getTravelGroupTranslations } from '@/constants/options';
 import React, { useEffect, useState } from 'react'
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { Button } from '@/components/ui/button'
@@ -478,9 +478,11 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
 import { generateTravelOptions } from '@/service/FlightService';
 import { weatherService } from '@/service/WeatherService';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslation } from '@/translations/translations';
 
 // Travel Mode Selector Component
-const TravelModeSelector = ({ formData, onSelectTravel }) => {
+const TravelModeSelector = ({ formData, onSelectTravel, t }) => {
   const [travelOptions, setTravelOptions] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
@@ -547,7 +549,7 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
       <div className='bg-white/85 backdrop-blur-sm rounded-2xl p-8 shadow-blue-lg border border-blue-100/50'>
         <div className='flex items-center justify-center gap-3'>
           <AiOutlineLoading3Quarters className='h-6 w-6 animate-spin text-slate-600' />
-          <span className='text-slate-600'>Loading travel options...</span>
+          <span className='text-slate-600'>{t('loadingTravelOptions')}</span>
         </div>
       </div>
     );
@@ -566,8 +568,8 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
           </svg>
         </div>
         <div>
-          <h2 className='text-xl font-bold text-gray-900'>Travel Mode</h2>
-          <p className='text-sm text-gray-600'>Choose your preferred mode of transport ({travelers} traveler{travelers > 1 ? 's' : ''})</p>
+          <h2 className='text-xl font-bold text-gray-900'>{t('travelModeTitle')}</h2>
+          <p className='text-sm text-gray-600'>{t('travelModeDesc')} ({travelers} {travelers > 1 ? t('travelers') : t('traveler')})</p>
         </div>
       </div>
 
@@ -576,11 +578,20 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
           const options = travelOptions[mode];
           if (!options || !Array.isArray(options)) return null;
 
+          const getModeLabel = (mode) => {
+            switch(mode) {
+              case 'flight': return t('flightOptions');
+              case 'train': return t('trainOptions');
+              case 'bus': return t('busOptions');
+              default: return mode;
+            }
+          };
+
           return (
             <div key={mode} className='border-2 border-slate-200 rounded-xl p-6 bg-slate-50/50'>
               <div className='flex items-center gap-3 mb-4'>
                 <div className='text-3xl'>{getTravelIcon(mode)}</div>
-                <h3 className='text-xl font-bold text-gray-900 capitalize'>{mode} Options</h3>
+                <h3 className='text-xl font-bold text-gray-900'>{getModeLabel(mode)}</h3>
               </div>
               
               <div className='space-y-3'>
@@ -611,9 +622,9 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
                           </div>
                         </div>
                         <div className='text-right'>
-                          <div className='text-sm text-gray-600'>₹{option.price.toLocaleString()}/person</div>
+                          <div className='text-sm text-gray-600'>₹{option.price.toLocaleString()}/{t('perPerson')}</div>
                           <div className='text-xl font-bold text-blue-600'>₹{totalCost.toLocaleString()}</div>
-                          <div className='text-xs text-slate-500'>for {travelers} traveler{travelers > 1 ? 's' : ''}</div>
+                          <div className='text-xs text-slate-500'>{t('forTravelers')} {travelers} {travelers > 1 ? t('travelers') : t('traveler')}</div>
                         </div>
                       </div>
                     </div>
@@ -629,6 +640,9 @@ const TravelModeSelector = ({ formData, onSelectTravel }) => {
 };
 
 function CreateTrip() {
+  const { language } = useLanguage();
+  const t = (key) => getTranslation(language, key);
+  
   const [place, setPlace] = useState();
   const [originPlace, setOriginPlace] = useState();
   const [formData, setFormData] = useState({
@@ -646,8 +660,28 @@ function CreateTrip() {
   });
   const [weatherData, setWeatherData] = useState(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
+  const [progressSteps, setProgressSteps] = useState([
+    { id: 1, label: 'Analyzing destination', completed: false, active: false },
+    { id: 2, label: 'Checking weather forecast', completed: false, active: false },
+    { id: 3, label: 'Finding best hotels', completed: false, active: false },
+    { id: 4, label: 'Creating daily itinerary', completed: false, active: false },
+    { id: 5, label: 'Optimizing budget', completed: false, active: false },
+    { id: 6, label: 'Finalizing trip plan', completed: false, active: false }
+  ]);
 
   const navigate = useNavigate();
+
+  // Update progress step labels when language changes
+  useEffect(() => {
+    setProgressSteps([
+      { id: 1, label: t('analyzingDestination'), completed: false, active: false },
+      { id: 2, label: t('checkingWeather'), completed: false, active: false },
+      { id: 3, label: t('findingHotels'), completed: false, active: false },
+      { id: 4, label: t('creatingItinerary'), completed: false, active: false },
+      { id: 5, label: t('optimizingBudget'), completed: false, active: false },
+      { id: 6, label: t('finalizingTrip'), completed: false, active: false }
+    ]);
+  }, [language]);
 
   const handleInputChange = (name, value) => {
     setFormData((prevData) => ({
@@ -692,6 +726,53 @@ function CreateTrip() {
       noOfDays: formData.noOfDays
     })
   }, [formData])
+
+  // Function to mark a step as active (in progress)
+  const setStepActive = (stepId) => {
+    console.log(`Setting step ${stepId} as active`);
+    setProgressSteps(prevSteps => 
+      prevSteps.map(step => {
+        if (step.id < stepId) {
+          return { ...step, completed: true, active: false };
+        } else if (step.id === stepId) {
+          return { ...step, completed: false, active: true };
+        } else {
+          return { ...step, completed: false, active: false };
+        }
+      })
+    );
+  };
+
+  // Function to mark a step as completed
+  const setStepCompleted = (stepId) => {
+    console.log(`Setting step ${stepId} as completed`);
+    setProgressSteps(prevSteps => 
+      prevSteps.map(step => {
+        if (step.id <= stepId) {
+          return { ...step, completed: true, active: false };
+        } else {
+          return step;
+        }
+      })
+    );
+  };
+
+  // Reset progress steps
+  const resetProgressSteps = () => {
+    setProgressSteps(prevSteps =>
+      prevSteps.map(step => ({ ...step, completed: false, active: false }))
+    );
+  };
+
+  // Helper function to run a step with timing
+  const runStep = async (stepId, duration) => {
+    console.log(`Starting step ${stepId}`);
+    setStepActive(stepId);
+    await new Promise(resolve => setTimeout(resolve, duration));
+    setStepCompleted(stepId);
+    await new Promise(resolve => setTimeout(resolve, 400)); // Pause to show checkmark
+    console.log(`Completed step ${stepId}`);
+  };
 
   const onGenerateTrip = async () => {
     const user = localStorage.getItem('user');
@@ -738,12 +819,19 @@ function CreateTrip() {
     }
 
     setLoading(true)
+    resetProgressSteps(); // Reset all steps at start
 
     try {
+      // Step 1: Analyzing destination
+      await runStep(1, 1200);
+
       // Find the selected theme details
       const selectedTheme = TripThemes.find(t => t.value === formData?.theme);
       const themeTitle = selectedTheme ? selectedTheme.title : 'General';
       const themeKeywords = formData?.themeKeywords || 'general sightseeing, popular attractions';
+
+      // Step 2: Checking weather forecast
+      await runStep(2, 1100);
 
       // Prepare weather information for prompt
       let weatherPrompt = '';
@@ -751,6 +839,9 @@ function CreateTrip() {
         weatherPrompt = weatherService.formatWeatherForPrompt(weatherData);
         console.log('Including weather-based recommendations in prompt');
       }
+
+      // Step 3: Finding hotels
+      await runStep(3, 1200);
 
       let FINAL_PROMPT = AI_PROMPT
         .replace(/{location}/g, formData?.location?.label)
@@ -764,6 +855,10 @@ function CreateTrip() {
       if (weatherPrompt) {
         FINAL_PROMPT += `\n\n${weatherPrompt}`;
       }
+
+      // Step 4: Creating itinerary (active during AI call)
+      setStepActive(4);
+      console.log('Starting step 4 - AI generation');
 
       console.log('Generating trip for:', formData);
       console.log('Weather data included:', !!weatherData);
@@ -782,11 +877,23 @@ function CreateTrip() {
         throw new Error('No response from AI service');
       }
 
+      setStepCompleted(4);
+      await new Promise(resolve => setTimeout(resolve, 400));
+      console.log('Completed step 4');
+
+      // Step 5: Optimizing budget
+      await runStep(5, 1000);
+
       console.log('AI Response:', tripData);
+      
+      // Step 6: Finalizing trip
+      await runStep(6, 1000);
+      
       SaveAiTrip(tripData);
     } catch (error) {
       console.error('Error generating trip:', error);
       setLoading(false);
+      resetProgressSteps();
       toast('Failed to generate trip', {
         description: 'Please check your internet connection and try again. Make sure all API keys are configured.',
       });
@@ -1210,6 +1317,14 @@ function CreateTrip() {
     }
     // 🆕 END OF NEW CODE
     
+    // Mark all steps as completed
+    setProgressSteps(prevSteps =>
+      prevSteps.map(step => ({ ...step, completed: true, active: false }))
+    );
+    
+    // Wait a bit to show all completed steps
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     setLoading(false);
     
     toast('🎉 Your trip has been created!', {
@@ -1224,6 +1339,7 @@ function CreateTrip() {
   } catch (error) {
     console.error('Error saving trip:', error);
     setLoading(false);
+    resetProgressSteps();
     toast('Failed to save your trip', {
       description: 'Please try again. If the problem persists, check your internet connection.',
     });
@@ -1340,7 +1456,7 @@ function CreateTrip() {
             </div>
 
             <p className='text-center text-xs text-gray-500 mt-4'>
-              This usually takes 10-30 seconds
+              {t('processingSubtext')}
             </p>
           </div>
         </div>
@@ -1385,16 +1501,16 @@ function CreateTrip() {
               <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
               </svg>
-              <span className='font-semibold'>Back</span>
+              <span className='font-semibold'>{t('back')}</span>
             </button>
           </div>
 
           <div className='text-center'>
             <h1 className='font-bold text-4xl md:text-5xl mb-4'>
-              Plan Your Perfect Trip
+              {t('planPerfectTrip')}
             </h1>
             <p className='text-xl text-blue-100 max-w-3xl mx-auto'>
-              Tell us your preferences and let AI create your personalized itinerary
+              {t('tellPreferences')}
             </p>
           </div>
         </div>
@@ -1448,8 +1564,8 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-bold text-gray-900'>Starting From</h2>
-                <p className='text-sm text-gray-600'>Where will you start your journey?</p>
+                <h2 className='text-xl font-bold text-gray-900'>{t('startingFrom')}</h2>
+                <p className='text-sm text-gray-600'>{t('startingFromDesc')}</p>
               </div>
             </div>
             <div className='relative z-50'>
@@ -1516,8 +1632,8 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-bold text-gray-900'>Destination</h2>
-                <p className='text-sm text-gray-600'>Where do you want to go?</p>
+                <h2 className='text-xl font-bold text-gray-900'>{t('destination')}</h2>
+                <p className='text-sm text-gray-600'>{t('destinationDesc')}</p>
               </div>
             </div>
             <div className='relative z-50'>
@@ -1583,15 +1699,15 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-bold text-gray-900'>Duration & Travel Dates</h2>
-                <p className='text-sm text-gray-600'>Trip length and when you're traveling</p>
+                <h2 className='text-xl font-bold text-gray-900'>{t('durationLabel')}</h2>
+                <p className='text-sm text-gray-600'>{t('durationDesc')}</p>
               </div>
             </div>
             <div className='space-y-4'>
               <div>
-                <label className='text-sm font-medium text-slate-700 mb-2 block'>Number of Days</label>
+                <label className='text-sm font-medium text-slate-700 mb-2 block'>{t('numberOfDaysLabel')}</label>
                 <input 
-                  placeholder='Enter number of days' 
+                  placeholder={t('numberOfDaysPlaceholder')} 
                   type='number'
                   value={formData.noOfDays || ''}
                   className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-white'
@@ -1603,7 +1719,7 @@ function CreateTrip() {
               </div>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
-                  <label className='text-sm font-medium text-slate-700 mb-2 block'>Departure Date</label>
+                  <label className='text-sm font-medium text-slate-700 mb-2 block'>{t('departureDateLabel')}</label>
                   <input 
                     type='date'
                     value={formData.departureDate || ''}
@@ -1624,7 +1740,7 @@ function CreateTrip() {
                   />
                 </div>
                 <div>
-                  <label className='text-sm font-medium text-slate-700 mb-2 block'>Return Date (Auto-calculated)</label>
+                  <label className='text-sm font-medium text-slate-700 mb-2 block'>{t('returnDateLabel')}</label>
                   <input 
                     type='date'
                     value={formData.returnDate || ''}
@@ -1632,7 +1748,7 @@ function CreateTrip() {
                     className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-slate-50'
                     readOnly
                   />
-                  <p className='text-xs text-slate-500 mt-1'>Automatically calculated from trip duration</p>
+                  <p className='text-xs text-slate-500 mt-1'>{t('autoCalculated')}</p>
                 </div>
               </div>
             </div>
@@ -1647,7 +1763,7 @@ function CreateTrip() {
                     <span className='text-3xl'>🌤️</span>
                   </div>
                   <div>
-                    <h3 className='text-xl font-bold text-gray-900'>Weather Forecast & Recommendations</h3>
+                    <h3 className='text-xl font-bold text-gray-900'>{t('weatherForecast')}</h3>
                     <p className='text-sm text-gray-600'>{formData.location.label} • {new Date(formData.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 </div>
@@ -1659,12 +1775,12 @@ function CreateTrip() {
                   {/* Current Weather & Forecast Summary */}
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div className='bg-white rounded-xl p-5 shadow-md border border-blue-100'>
-                      <p className='text-xs font-semibold text-gray-500 uppercase mb-2'>Current Conditions</p>
+                      <p className='text-xs font-semibold text-gray-500 uppercase mb-2'>{t('currentConditions')}</p>
                       <div className='flex items-center justify-between'>
                         <div>
                           <p className='text-4xl font-bold text-gray-900'>{weatherData.current.temperature}°C</p>
                           <p className='text-base text-gray-700 mt-1'>{weatherData.current.condition}</p>
-                          <p className='text-sm text-gray-500 mt-2'>Feels like {weatherData.current.feelsLike}°C</p>
+                          <p className='text-sm text-gray-500 mt-2'>{t('feelsLike')} {weatherData.current.feelsLike}°C</p>
                         </div>
                         <div className='text-right text-sm text-gray-600 space-y-1'>
                           <p>💧 {weatherData.current.humidity}%</p>
@@ -1694,7 +1810,7 @@ function CreateTrip() {
                       <div>
                         <h4 className='font-bold text-gray-900 mb-3 flex items-center gap-2 text-base'>
                           <span className='text-green-600'>✅</span>
-                          Recommended Activities
+                          {t('recommendedActivities')}
                         </h4>
                         <ul className='space-y-2.5'>
                           {weatherData.recommendations.bestActivities.slice(0, 5).map((activity, idx) => (
@@ -1710,7 +1826,7 @@ function CreateTrip() {
                       <div>
                         <h4 className='font-bold text-gray-900 mb-3 flex items-center gap-2 text-base'>
                           <span className='text-purple-600'>📍</span>
-                          Suggested Places
+                          {t('suggestedPlaces')}
                         </h4>
                         <ul className='space-y-2.5'>
                           {weatherData.recommendations.placesToVisit.slice(0, 5).map((place, idx) => (
@@ -1730,7 +1846,7 @@ function CreateTrip() {
                     <div className='bg-white rounded-xl p-4 shadow-md border border-blue-100'>
                       <h4 className='font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm'>
                         <span>👕</span>
-                        What to Pack
+                        {t('whatToPack')}
                       </h4>
                       <div className='flex flex-wrap gap-2'>
                         {weatherData.recommendations.clothingSuggestions.map((item, idx) => (
@@ -1745,7 +1861,7 @@ function CreateTrip() {
                     <div className='bg-amber-50 border-2 border-amber-200 rounded-xl p-4 shadow-md'>
                       <h4 className='font-bold text-amber-900 mb-3 text-sm flex items-center gap-2'>
                         <span>⏰</span>
-                        Best Timing
+                        {t('bestTiming')}
                       </h4>
                       <ul className='space-y-1.5'>
                         {weatherData.recommendations.timingSuggestions.slice(0, 3).map((tip, idx) => (
@@ -1763,7 +1879,7 @@ function CreateTrip() {
                     <p className='text-sm text-indigo-900 flex items-start gap-2'>
                       <span className='text-xl'>🤖</span>
                       <span className='leading-relaxed'>
-                        <strong>AI-Powered Optimization:</strong> These weather insights will be used to create your perfect itinerary, suggesting indoor activities during extreme conditions and outdoor adventures during pleasant weather. Your trip will be perfectly timed for the best experience!
+                        <strong>{t('aiOptimization')}:</strong> {t('aiOptimizationDesc')}
                       </span>
                     </p>
                   </div>
@@ -1773,7 +1889,7 @@ function CreateTrip() {
               {loadingWeather && (
                 <div className='text-center py-8'>
                   <AiOutlineLoading3Quarters className='animate-spin text-blue-600 mx-auto mb-3' size={32} />
-                  <p className='text-gray-600 font-medium'>Loading weather forecast...</p>
+                  <p className='text-gray-600 font-medium'>{t('loadingWeather')}</p>
                   <p className='text-sm text-gray-500 mt-1'>Analyzing conditions for your travel dates</p>
                 </div>
               )}
@@ -1789,12 +1905,12 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-bold text-gray-900'>Trip Theme</h2>
-                <p className='text-sm text-gray-600'>Choose your travel experience focus</p>
+                <h2 className='text-xl font-bold text-gray-900'>{t('tripTheme')}</h2>
+                <p className='text-sm text-gray-600'>{t('tripThemeDesc')}</p>
               </div>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              {TripThemes.map((theme, index) => (
+              {getThemeTranslations(t).map((theme, index) => (
                 <div 
                   key={index}
                   onClick={() => {
@@ -1832,8 +1948,8 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-bold text-gray-900'>Budget Range</h2>
-                <p className='text-sm text-gray-600'>Set your total trip budget</p>
+                <h2 className='text-xl font-bold text-gray-900'>{t('budgetRange')}</h2>
+                <p className='text-sm text-gray-600'>{t('budgetRangeDesc')}</p>
               </div>
             </div>
             
@@ -1843,7 +1959,7 @@ function CreateTrip() {
                 <div className='text-3xl font-bold text-slate-800 mb-2'>
                   {formatBudgetRange(budgetRange?.min, budgetRange?.max)}
                 </div>
-                <p className='text-sm text-gray-600'>Budget range for entire trip</p>
+                <p className='text-sm text-gray-600'>{t('budgetRangeFor')}</p>
               </div>
 
               {/* Dual Range Slider with Buttons */}
@@ -1887,7 +2003,7 @@ function CreateTrip() {
                 {/* Value indicators with +/- buttons */}
                 <div className='flex justify-between items-center mt-4'>
                   <div className='text-center'>
-                    <div className='text-sm font-medium text-slate-700 mb-2'>Min Budget</div>
+                    <div className='text-sm font-medium text-slate-700 mb-2'>{t('minBudget')}</div>
                     <div className='flex items-center gap-2'>
                       <button
                         onClick={() => handleBudgetChange('min', Math.max(BudgetSliderConfig.min, (budgetRange?.min || BudgetSliderConfig.defaultMin) - BudgetSliderConfig.step))}
@@ -1905,7 +2021,7 @@ function CreateTrip() {
                     </div>
                   </div>
                   <div className='text-center'>
-                    <div className='text-sm font-medium text-slate-700 mb-2'>Max Budget</div>
+                    <div className='text-sm font-medium text-slate-700 mb-2'>{t('maxBudget')}</div>
                     <div className='flex items-center gap-2'>
                       <button
                         onClick={() => handleBudgetChange('max', Math.max((budgetRange?.min || BudgetSliderConfig.defaultMin) + BudgetSliderConfig.step, (budgetRange?.max || BudgetSliderConfig.defaultMax) - BudgetSliderConfig.step))}
@@ -1988,12 +2104,12 @@ function CreateTrip() {
                 </svg>
               </div>
               <div>
-                <h2 className='text-xl font-bold text-gray-900'>Travel Group</h2>
-                <p className='text-sm text-gray-600'>Select your travel companion type</p>
+                <h2 className='text-xl font-bold text-gray-900'>{t('travelGroup')}</h2>
+                <p className='text-sm text-gray-600'>{t('travelGroupDesc')}</p>
               </div>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              {SelectTravelList.map((item, index) => (
+              {getTravelGroupTranslations(t).map((item, index) => (
                 <div key={index}
                   onClick={() => {
                     handleInputChange('traveler', item.people);
@@ -2023,14 +2139,14 @@ function CreateTrip() {
             {(formData?.traveler === '3-5 People' || formData?.traveler === '5+ People') && (
               <div className='mt-6 p-6 bg-blue-50 rounded-xl border-2 border-blue-200'>
                 <label className='text-sm font-medium text-slate-700 mb-2 block'>
-                  How many people are traveling?
+                  {t('howManyPeople')}
                 </label>
                 <input
                   type='number'
                   min='1'
                   max='20'
                   value={formData.numberOfPeople || ''}
-                  placeholder='Enter number of people'
+                  placeholder={t('enterNumberPeople')}
                   className='w-full text-lg p-4 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all duration-300 bg-white'
                   onChange={(e) => {
                     handleInputChange('numberOfPeople', e.target.value);
@@ -2049,6 +2165,7 @@ function CreateTrip() {
               onSelectTravel={(travelData) => {
                 handleInputChange('selectedTravel', travelData);
               }}
+              t={t}
             />
           )}
         </div>
@@ -2063,27 +2180,72 @@ function CreateTrip() {
             {loading ? (
               <div className='flex items-center gap-3'>
                 <AiOutlineLoading3Quarters className='h-5 w-5 animate-spin' />
-                <span>Processing Request...</span>
+                <span>{t('processingRequest')}</span>
               </div>
             ) : (
               <div className='flex items-center gap-3'>
                 <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
                 </svg>
-                <span>Generate Trip Plan</span>
+                <span>{t('generateButton')}</span>
               </div>
             )}
           </Button>
           
           {loading && (
-            <div className='mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto'>
-              <div className='flex items-center justify-center gap-3 mb-4'>
+            <div className='mt-6 bg-white/95 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto shadow-xl border-2 border-indigo-200'>
+              <div className='flex items-center justify-center gap-3 mb-5'>
                 <div className='loading-spinner'></div>
-                <span className='text-gray-700 font-medium'>Crafting your perfect itinerary...</span>
+                <span className='text-gray-700 font-semibold text-lg'>{t('craftingItinerary')}</span>
               </div>
-              <div className='w-full bg-gray-200 rounded-full h-2'>
-                <div className='bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full animate-pulse' style={{width: '60%'}}></div>
+              
+              {/* Progress Steps */}
+              <div className='space-y-3 mb-5'>
+                {progressSteps.map((step) => (
+                  <div key={step.id} className='flex items-center gap-3'>
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      step.completed 
+                        ? 'bg-green-500 text-white' 
+                        : step.active 
+                        ? 'bg-indigo-500 text-white animate-pulse' 
+                        : 'bg-gray-200 text-gray-400'
+                    }`}>
+                      {step.completed ? (
+                        <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                          <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+                        </svg>
+                      ) : step.active ? (
+                        <AiOutlineLoading3Quarters className='w-3 h-3 animate-spin' />
+                      ) : (
+                        <span className='text-xs font-bold'>{step.id}</span>
+                      )}
+                    </div>
+                    <span className={`text-sm transition-all duration-300 ${
+                      step.completed 
+                        ? 'text-green-600 font-medium' 
+                        : step.active 
+                        ? 'text-indigo-600 font-semibold' 
+                        : 'text-gray-400'
+                    }`}>
+                      {step.label}
+                    </span>
+                  </div>
+                ))}
               </div>
+
+              {/* Progress Bar */}
+              <div className='w-full bg-gray-200 rounded-full h-2.5 overflow-hidden'>
+                <div 
+                  className='bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-500 ease-out'
+                  style={{
+                    width: `${(progressSteps.filter(s => s.completed).length / progressSteps.length) * 100}%`
+                  }}
+                ></div>
+              </div>
+              
+              <p className='text-center text-xs text-gray-500 mt-3'>
+                {progressSteps.filter(s => s.completed).length} of {progressSteps.length} {t('stepsCompleted')}
+              </p>
             </div>
           )}
         </div>
