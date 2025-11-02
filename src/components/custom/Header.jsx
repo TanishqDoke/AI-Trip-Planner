@@ -59,9 +59,6 @@ function Header() {
               <a href="/my-trips" className='text-gray-700 hover:text-[#2276E3] font-medium text-sm transition-colors'>
                 My Trips
               </a>
-              <a href="#offers" className='text-gray-700 hover:text-[#2276E3] font-medium text-sm transition-colors'>
-                Offers
-              </a>
             </nav>
           </div>
           <div>
